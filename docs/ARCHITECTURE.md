@@ -20,7 +20,7 @@ Cliente (front ou Swagger)
   Services (regras de negócio e de acesso)
         |
         +--> SQLAlchemy --> PostgreSQL
-        +--> Storage ------> disco / volume
+        +--> Storage ------> disco (local) ou PostgreSQL (database)
 ```
 
 ## Camadas
@@ -52,7 +52,8 @@ Tentativas de login malsucedidas são limitadas por IP e e-mail (5 falhas em 15 
 - O tamanho é limitado durante a gravação, em blocos, sem carregar o arquivo inteiro em memória.
 - O nome gravado é um UUID. O nome original fica apenas no banco, para exibição e para o cabeçalho de download.
 - Downloads passam pela API e conferem a permissão. As respostas levam `X-Content-Type-Options: nosniff` e, para anexos, `Content-Security-Policy: sandbox`.
-- O banco guarda os metadados; remover uma tarefa ou um anexo remove também o arquivo.
+- O banco guarda os metadados. O conteúdo vai para o backend escolhido em `STORAGE_BACKEND`: disco (`local`) ou tabela `attachment_blobs` (`database`). Os dois seguem o mesmo contrato (`save`, `read`, `delete`) e passam pela mesma suíte de testes.
+- Remover uma tarefa ou um anexo remove também o conteúdo.
 
 ## Erros
 
@@ -82,13 +83,13 @@ A suíte usa SQLite em memória por padrão e PostgreSQL quando `TEST_DATABASE_U
 |---|---|---|---|
 | Autorização | Camada de services | Verificação nos routers | Evita repetir a regra e facilita testar |
 | Recurso de outro usuário | `404` | `403` | Não revela a existência do recurso |
-| Anexos | Disco atrás de interface | Arquivo no banco | Mantém o banco leve; a interface permite trocar por S3 |
+| Anexos | Interface com dois backends: disco e PostgreSQL | Apenas disco | Hospedagens gratuitas têm disco efêmero; o backend em banco mantém os anexos após reinícios |
 | Sessão | JWT de acesso | Sessão em servidor | Sem estado no servidor, suficiente para o escopo |
 | Limite de login | Em memória | Redis | Sem dependência extra; limitação documentada |
 | Erros | Código estável + mensagem | Apenas status HTTP | O front decide a mensagem a partir do código |
 
 ## Limitações
 
-- O limite de login e o armazenamento em disco não são compartilhados entre instâncias.
+- O limite de login é por processo, e o backend `local` não é compartilhado entre instâncias.
 - Não há refresh token nem revogação de sessão.
 - A assinatura do arquivo confere o início do conteúdo, não faz varredura de malware.

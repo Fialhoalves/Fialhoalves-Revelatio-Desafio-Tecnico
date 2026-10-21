@@ -25,7 +25,7 @@ Na segunda forma a suíte roda contra PostgreSQL. O banco informado é recriado 
 | `test_security_rules.py` | 20 | Uma execução por rota da API exigindo `401` sem token, exceto as rotas públicas listadas; descoberta de rotas não vazia; token falsificado ou expirado; perfil nunca aceito do cliente. |
 | `test_errors.py` | 16 | Um teste por código do catálogo de erros, com status e `code` esperados; mesma resposta para e-mail inexistente e senha errada; validação com lista de campos; erro inesperado sem vazar detalhes. |
 | `test_task_queries.py` | 12 | Filtros por prioridade, prazo e atraso; ordenação por prazo (sem prazo no fim), prioridade e título; paginação com total; campo de ordenação inválido; estatísticas para usuário e administrador. |
-| `test_attachments.py` | 9 | Ciclo de upload, listagem, download e remoção; tipo não permitido; arquivo grande demais; assinatura do conteúdo; acesso seguindo o dono; remoção dos arquivos ao apagar a tarefa; headers de segurança. |
+| `test_attachments.py` | 22 | 11 cenários executados nos dois backends de armazenamento (disco e PostgreSQL): ciclo de upload, listagem, download e remoção; nome com acentos no download; tipo não permitido; arquivo grande demais sem deixar resíduo; assinatura do conteúdo; acesso seguindo o dono; remoção do conteúdo ao apagar a tarefa; headers de segurança. |
 | `test_health_and_config.py` | 8 | Health de vida e de prontidão (incluindo falha do banco); `SECRET_KEY` fraca rejeitada em produção e aceita em desenvolvimento. |
 | `test_tasks.py` | 7 | CRUD e conclusão; validações; isolamento entre usuários; administrador gerenciando tudo; filtros básicos; `owner_id` ignorado no corpo da requisição. |
 | `test_auth.py` | 5 | Cadastro, login, e-mail duplicado, senha errada, `/users` restrito a administrador. |
@@ -33,7 +33,7 @@ Na segunda forma a suíte roda contra PostgreSQL. O banco informado é recriado 
 
 ## Por que esses testes
 
-A contagem é consequência dos critérios abaixo, não uma meta. São cerca de 63 cenários distintos; as demais execuções são variações do mesmo cenário (por exemplo, o teste de autenticação roda uma vez para cada uma das 17 rotas).
+A contagem é consequência dos critérios abaixo, não uma meta. São 65 cenários distintos em 94 execuções; as demais são variações do mesmo cenário (o teste de autenticação roda uma vez para cada uma das 17 rotas e os testes de anexos rodam nos dois backends).
 
 1. **Cada regra de acesso tem um caso permitido e um proibido.** Usuário comum e administrador contra cada recurso (tarefa, anexo, lista de usuários, estatísticas).
 2. **Cada código de erro do catálogo tem um teste.** O front depende desses códigos, então eles fazem parte do contrato.

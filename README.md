@@ -46,7 +46,12 @@ Token de acesso com expiração configurável e senhas armazenadas apenas como h
 
 ### Armazenamento de anexos
 
-Os arquivos ficam em disco (volume no Docker) com nome gerado por UUID, e os metadados ficam no banco. O acesso é encapsulado em `app/storage`, atrás de uma interface pequena, o que permite trocar por um serviço de objetos sem alterar as rotas. Downloads sempre passam pela API, que confere a permissão antes de servir o arquivo.
+Os metadados ficam na tabela `attachments` e o conteúdo em um de dois backends, escolhido por `STORAGE_BACKEND`:
+
+- `local`: arquivos em disco (volume no Docker), com nome gerado por UUID.
+- `database`: conteúdo na tabela `attachment_blobs` do PostgreSQL. Indicado para hospedagens com disco efêmero, onde arquivos em disco são perdidos a cada reinício.
+
+O acesso é encapsulado em `app/storage`, atrás de uma interface pequena (`save`, `read`, `delete`), o que permite adicionar um serviço de objetos sem alterar as rotas. Downloads sempre passam pela API, que confere a permissão antes de servir o arquivo.
 
 ### React, Vite e Tailwind
 
@@ -185,7 +190,8 @@ Os valores de exemplo estão em `backend/.env.example`.
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Validade do token | `60` |
 | `LOGIN_MAX_ATTEMPTS`, `LOGIN_WINDOW_SECONDS` | Falhas de login permitidas e janela em segundos | `5`, `900` |
 | `CORS_ORIGINS` | Origens do front, separadas por vírgula | `http://localhost:5173` |
-| `UPLOAD_DIR` | Pasta dos anexos | `uploads` |
+| `STORAGE_BACKEND` | Onde ficam os anexos: `local` ou `database` | `local` |
+| `UPLOAD_DIR` | Pasta dos anexos (backend `local`) | `uploads` |
 | `MAX_UPLOAD_MB` | Tamanho máximo por arquivo | `10` |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Administrador criado pelo seed | `admin@example.com`, `admin12345` |
 
@@ -230,7 +236,13 @@ Os erros seguem o formato e o catálogo descritos em [docs/ERRORS.md](docs/ERROR
 
 ## Deploy
 
-A API roda no Railway com PostgreSQL gerenciado e volume persistente para os anexos. O front-end é publicado na Vercel.
+A API roda no Render, a partir do blueprint `render.yaml`, com PostgreSQL gerenciado e anexos armazenados no banco (`STORAGE_BACKEND=database`). O front-end é publicado na Vercel.
+
+Passos:
+
+1. Render: criar um Blueprint apontando para este repositório. Informar `CORS_ORIGINS` (URL da Vercel), `ADMIN_PASSWORD` e `DEMO_USER_PASSWORD` quando solicitado. A migration e o seed rodam na inicialização.
+2. Vercel: importar o repositório com Root Directory `frontend` e a variável `VITE_API_URL` apontando para a URL da API.
+3. No plano gratuito do Render a API entra em repouso após 15 minutos sem uso, e a primeira requisição seguinte pode levar cerca de um minuto.
 
 - API: a definir
 - Front-end: a definir
@@ -255,7 +267,7 @@ Link: a definir
 
 ## Limitações conhecidas
 
-- Os anexos ficam em disco local. Em mais de uma instância seria necessário um armazenamento compartilhado.
+- No backend `local` os anexos ficam em disco e não são compartilhados entre instâncias. O backend `database` não tem essa restrição, mas aumenta o tamanho do banco.
 - O limite de tentativas de login fica em memória do processo e não é compartilhado entre instâncias.
 - O token de acesso não possui refresh nem revogação.
 - A validação de anexos confere a assinatura do conteúdo, mas não faz varredura de malware.

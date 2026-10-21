@@ -5,13 +5,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 
 from app.core.deps import CurrentUser, DbSession
-from app.core.errors import EmailAlreadyRegistered, InvalidCredentials
+from app.core.errors import EmailAlreadyRegistered, InvalidCredentials, error_responses
 from app.core.rate_limit import login_limiter
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models import Role, User
 from app.schemas.user import Token, UserCreate, UserOut
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"], responses=error_responses(401, 409, 429))
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)

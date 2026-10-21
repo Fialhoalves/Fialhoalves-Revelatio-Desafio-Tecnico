@@ -8,6 +8,18 @@ from app.schemas.user import UserSummary
 
 
 class TaskCreate(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "Preparar apresentação",
+                "description": "Slides da reunião de quinta",
+                "due_date": "2026-11-05",
+                "status": "PENDING",
+                "priority": "HIGH",
+            }
+        }
+    )
+
     title: str = Field(min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=5000)
     due_date: date | None = None

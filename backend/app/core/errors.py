@@ -132,6 +132,21 @@ class ErrorResponse(BaseModel):
     error: ErrorBody
 
 
+def error_responses(*status_codes: int) -> dict[int | str, dict[str, Any]]:
+    """Documenta no OpenAPI as respostas de erro de um router ou rota."""
+    descriptions = {
+        401: "Não autenticado ou sessão inválida",
+        403: "Sem permissão",
+        404: "Recurso não encontrado (ou de outro usuário)",
+        409: "Conflito com dados existentes",
+        413: "Arquivo acima do limite de tamanho",
+        415: "Tipo ou conteúdo de arquivo não permitido",
+        429: "Muitas tentativas",
+        503: "Serviço indisponível",
+    }
+    return {code: {"model": ErrorResponse, "description": descriptions[code]} for code in status_codes}
+
+
 def _response(
     status_code: int,
     code: str,

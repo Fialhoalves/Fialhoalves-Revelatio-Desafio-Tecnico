@@ -6,6 +6,10 @@ from app.models.enums import Role
 
 
 class UserCreate(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"name": "Ana Souza", "email": "ana@example.com", "password": "senha12345"}}
+    )
+
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     password: str = Field(min_length=8, max_length=72)

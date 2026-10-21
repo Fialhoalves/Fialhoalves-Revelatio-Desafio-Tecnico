@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends, Query, Response, UploadFile, status
 from fastapi.responses import FileResponse
 
 from app.core.deps import CurrentUser, DbSession
-from app.core.errors import AttachmentFileMissing
+from app.core.errors import AttachmentFileMissing, error_responses
 from app.schemas.attachment import AttachmentOut
 from app.services import attachments as attachment_service
 from app.services.tasks import get_accessible_task
 from app.storage import get_storage
 from app.storage.local import LocalStorage
 
-router = APIRouter(tags=["attachments"])
+router = APIRouter(tags=["attachments"], responses=error_responses(401, 404, 413, 415))
 
 Storage = Annotated[LocalStorage, Depends(get_storage)]
 

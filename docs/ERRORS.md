@@ -25,6 +25,7 @@ Toda resposta de erro tem o mesmo formato:
 | `AUTH_REQUIRED` | 401 | Chamada sem token | Redirecionar para o login |
 | `AUTH_TOKEN_INVALID` | 401 | Token expirado, adulterado ou de usuário removido | Limpar sessão, ir ao login com aviso "sessão expirou" |
 | `AUTH_INVALID_CREDENTIALS` | 401 | E-mail ou senha errados (mesma resposta nos dois casos) | Mostrar no formulário de login |
+| `RATE_LIMITED` | 429 | Muitas tentativas de login malsucedidas para o mesmo IP e e-mail (o cabeçalho `Retry-After` indica os segundos de espera) | Mensagem no login e bloqueio temporário do botão |
 | `PERMISSION_DENIED` | 403 | Usuário comum tentando área de admin | Aviso "sem permissão"; esconder a área |
 | `EMAIL_ALREADY_REGISTERED` | 409 | Cadastro com e-mail já usado | Erro no campo e-mail; sugerir login |
 | `TASK_NOT_FOUND` | 404 | Task inexistente **ou** de outro usuário | Voltar à lista com aviso |

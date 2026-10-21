@@ -2,10 +2,11 @@ from fastapi import APIRouter
 from sqlalchemy import select
 
 from app.core.deps import AdminUser, DbSession
+from app.core.errors import error_responses
 from app.models import User
 from app.schemas.user import UserOut
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/users", tags=["users"], responses=error_responses(401, 403))
 
 
 @router.get("", response_model=list[UserOut])

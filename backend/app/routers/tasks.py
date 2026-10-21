@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.core.deps import CurrentUser, DbSession
+from app.core.errors import error_responses
 from app.models import Priority, TaskStatus
 from app.schemas.task import TaskCreate, TaskOut, TaskPage, TaskStats, TaskUpdate
 from app.services import tasks as task_service
@@ -11,7 +12,7 @@ from app.services.tasks import SortField, SortOrder
 from app.storage import get_storage
 from app.storage.local import LocalStorage
 
-router = APIRouter(prefix="/tasks", tags=["tasks"])
+router = APIRouter(prefix="/tasks", tags=["tasks"], responses=error_responses(401, 404))
 
 Storage = Annotated[LocalStorage, Depends(get_storage)]
 

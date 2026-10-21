@@ -4,9 +4,9 @@ from fastapi import APIRouter
 from sqlalchemy import text
 
 from app.core.deps import DbSession
-from app.core.errors import DatabaseUnavailable
+from app.core.errors import DatabaseUnavailable, error_responses
 
-router = APIRouter(prefix="/health", tags=["health"])
+router = APIRouter(prefix="/health", tags=["health"], responses=error_responses(503))
 logger = logging.getLogger("app.health")
 
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.core.errors import ErrorResponse, register_error_handlers
+from app.core.errors import register_error_handlers
 from app.core.logging import setup_logging
 from app.core.middleware import register_middlewares
 from app.routers import attachments, auth, health, tasks, users
@@ -14,12 +14,13 @@ app = FastAPI(
     title="Task Manager API",
     description="Mini gerenciador de tarefas com anexos, autenticação JWT e controle de acesso por perfil.",
     version="1.0.0",
-    responses={
-        401: {"model": ErrorResponse, "description": "Não autenticado ou sessão inválida"},
-        403: {"model": ErrorResponse, "description": "Sem permissão"},
-        404: {"model": ErrorResponse, "description": "Recurso não encontrado"},
-        422: {"model": ErrorResponse, "description": "Erro de validação"},
-    },
+    openapi_tags=[
+        {"name": "auth", "description": "Cadastro, login (JWT) e dados do usuário autenticado."},
+        {"name": "users", "description": "Listagem de usuários. Restrito a administradores."},
+        {"name": "tasks", "description": "Tarefas. Usuário comum acessa só as próprias; administrador acessa todas."},
+        {"name": "attachments", "description": "Anexos das tarefas, com validação de tipo, conteúdo e tamanho."},
+        {"name": "health", "description": "Verificações de vida e prontidão para o deploy."},
+    ],
 )
 
 register_error_handlers(app)

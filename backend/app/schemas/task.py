@@ -43,3 +43,18 @@ class TaskOut(BaseModel):
 class TaskPage(BaseModel):
     items: list[TaskOut]
     total: int
+
+
+class OwnerStats(BaseModel):
+    owner_id: int
+    owner_name: str
+    total: int
+    by_status: dict[TaskStatus, int]
+
+
+class TaskStats(BaseModel):
+    total: int
+    overdue: int
+    by_status: dict[TaskStatus, int]
+    by_priority: dict[Priority, int]
+    by_owner: list[OwnerStats] | None = None  # apenas para administradores

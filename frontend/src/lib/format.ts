@@ -19,6 +19,11 @@ export function formatDate(value: string | null): string {
   return `${day}/${month}/${year}`
 }
 
+/** Data de criação vinda do servidor (ISO com fuso), exibida no fuso do navegador. */
+export function formatCreated(value: string): string {
+  return new Date(value).toLocaleDateString('pt-BR')
+}
+
 export function todayISO(): string {
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')

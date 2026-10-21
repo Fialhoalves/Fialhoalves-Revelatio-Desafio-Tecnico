@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { attachmentsApi, tasksApi } from '../api/endpoints'
 import { downloadAttachment, isPreviewable } from '../lib/download'
 import { ApiError, errorMessage, fieldErrors } from '../lib/errors'
-import { ACCEPTED_TYPES, checkFile, formatSize, PRIORITY_LABEL, STATUS_LABEL } from '../lib/format'
+import { ACCEPTED_TYPES, checkFile, formatCreated, formatSize, PRIORITY_LABEL, STATUS_LABEL } from '../lib/format'
 import type { Attachment, Priority, Task, TaskInput, TaskStatus } from '../types'
 import { AttachmentPreview } from './AttachmentPreview'
 import { SelectedFileItem } from './SelectedFileItem'
@@ -111,6 +111,12 @@ export function TaskFormDialog({ task, onClose, onChanged }: Props) {
       <Modal title={task ? 'Editar tarefa' : 'Nova tarefa'} onClose={onClose}>
         <form onSubmit={submit} className="space-y-4" noValidate>
           {formError && <Alert>{formError}</Alert>}
+
+          {task && (
+            <p className="text-xs text-white/50">
+              Criada em {formatCreated(task.created_at)} · atualizada em {formatCreated(task.updated_at)}
+            </p>
+          )}
 
           <Field label="Título" error={errors.title}>
             <input

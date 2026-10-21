@@ -22,6 +22,10 @@ export function isPdf(attachment: Attachment): boolean {
   return attachment.content_type === 'application/pdf'
 }
 
+export function isText(attachment: Attachment): boolean {
+  return attachment.content_type === 'text/plain' || attachment.content_type === 'text/csv'
+}
+
 export function isPreviewable(attachment: Attachment): boolean {
-  return isImage(attachment) || isPdf(attachment)
+  return isImage(attachment) || isPdf(attachment) || isText(attachment)
 }

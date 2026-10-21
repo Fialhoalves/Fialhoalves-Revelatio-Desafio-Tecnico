@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { formatDate, isOverdue, PRIORITY_LABEL, STATUS_LABEL } from '../lib/format'
+import { formatCreated, formatDate, isOverdue, PRIORITY_LABEL, STATUS_LABEL } from '../lib/format'
 import { PRIORITY_TONE, STATUS_ORDER } from '../lib/tones'
-import type { Task, TaskStatus } from '../types'
+import type { Attachment, Task, TaskStatus } from '../types'
+import { AttachmentPreview } from './AttachmentPreview'
+import { AttachmentStrip } from './AttachmentStrip'
 import { Badge } from './ui'
 
 const DOT: Record<TaskStatus, string> = {
@@ -23,6 +25,7 @@ interface Props {
   statuses: TaskStatus[]
   showOwner: boolean
   onMove: (task: Task, status: TaskStatus) => void
+  onComplete: (task: Task) => void
   onEdit: (task: Task) => void
   onDelete: (task: Task) => void
 }
@@ -62,7 +65,7 @@ interface Returning {
  * do navegador, que não funciona com toque. No celular o arrasto começa pela alça do cartão, para não
  * bloquear a rolagem da página; o seletor de status de cada cartão continua como alternativa.
  */
-export function KanbanBoard({ tasks, statuses, showOwner, onMove, onEdit, onDelete }: Props) {
+export function KanbanBoard({ tasks, statuses, showOwner, onMove, onComplete, onEdit, onDelete }: Props) {
   const columnRefs = useRef(new Map<TaskStatus, HTMLElement>())
   const pending = useRef<PendingDrag | null>(null)
   const pointer = useRef({ x: 0, y: 0 })
@@ -74,6 +77,7 @@ export function KanbanBoard({ tasks, statuses, showOwner, onMove, onEdit, onDele
   const [floating, setFloating] = useState<Floating | null>(null)
   const [returning, setReturning] = useState<Returning | null>(null)
   const [landedId, setLandedId] = useState<number | null>(null)
+  const [previewing, setPreviewing] = useState<Attachment | null>(null)
 
   useEffect(() => {
     onMoveRef.current = onMove
@@ -235,6 +239,8 @@ export function KanbanBoard({ tasks, statuses, showOwner, onMove, onEdit, onDele
                     onPointerDown={(event, card, fromHandle) => beginDrag(task, event, card, fromHandle)}
                     shouldSuppressClick={() => suppressClick.current}
                     onMove={onMove}
+                    onComplete={onComplete}
+                    onPreview={setPreviewing}
                     onEdit={onEdit}
                     onDelete={onDelete}
                   />
@@ -297,6 +303,8 @@ export function KanbanBoard({ tasks, statuses, showOwner, onMove, onEdit, onDele
           </div>,
           document.body,
         )}
+
+      {previewing && <AttachmentPreview attachment={previewing} onClose={() => setPreviewing(null)} />}
     </>
   )
 }
@@ -309,11 +317,25 @@ interface CardProps {
   onPointerDown: (event: ReactPointerEvent<HTMLElement>, card: HTMLElement, fromHandle: boolean) => void
   shouldSuppressClick: () => boolean
   onMove: (task: Task, status: TaskStatus) => void
+  onComplete: (task: Task) => void
+  onPreview: (attachment: Attachment) => void
   onEdit: (task: Task) => void
   onDelete: (task: Task) => void
 }
 
-function BoardCard({ task, showOwner, placeholder, landed, onPointerDown, shouldSuppressClick, onMove, onEdit, onDelete }: CardProps) {
+function BoardCard({
+  task,
+  showOwner,
+  placeholder,
+  landed,
+  onPointerDown,
+  shouldSuppressClick,
+  onMove,
+  onComplete,
+  onPreview,
+  onEdit,
+  onDelete,
+}: CardProps) {
   return (
     <article
       onPointerDown={(event) => onPointerDown(event, event.currentTarget, false)}
@@ -333,6 +355,8 @@ function BoardCard({ task, showOwner, placeholder, landed, onPointerDown, should
         }}
         shouldSuppressClick={shouldSuppressClick}
         onMove={onMove}
+        onComplete={onComplete}
+        onPreview={onPreview}
         onEdit={onEdit}
         onDelete={onDelete}
       />
@@ -347,12 +371,25 @@ interface ContentProps {
   onHandlePointerDown?: (event: ReactPointerEvent<HTMLButtonElement>) => void
   shouldSuppressClick?: () => boolean
   onMove?: (task: Task, status: TaskStatus) => void
+  onComplete?: (task: Task) => void
+  onPreview?: (attachment: Attachment) => void
   onEdit?: (task: Task) => void
   onDelete?: (task: Task) => void
 }
 
 /** Conteúdo do cartão, compartilhado entre o cartão da coluna e o cartão flutuante durante o arrasto. */
-function CardContent({ task, showOwner, interactive = false, onHandlePointerDown, shouldSuppressClick, onMove, onEdit, onDelete }: ContentProps) {
+function CardContent({
+  task,
+  showOwner,
+  interactive = false,
+  onHandlePointerDown,
+  shouldSuppressClick,
+  onMove,
+  onComplete,
+  onPreview,
+  onEdit,
+  onDelete,
+}: ContentProps) {
   const overdue = isOverdue(task.due_date, task.status)
 
   return (
@@ -390,6 +427,8 @@ function CardContent({ task, showOwner, interactive = false, onHandlePointerDown
         </button>
       </div>
 
+      {task.description && <p className="mt-1 line-clamp-2 text-xs text-white/60">{task.description}</p>}
+
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <Badge tone={PRIORITY_TONE[task.priority]}>{PRIORITY_LABEL[task.priority]}</Badge>
         <span className={`text-[11px] ${overdue ? 'text-red-300' : 'text-white/60'}`}>
@@ -398,7 +437,14 @@ function CardContent({ task, showOwner, interactive = false, onHandlePointerDown
         </span>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 text-[11px] text-white/50">
+      <AttachmentStrip
+        attachments={task.attachments}
+        onPreview={interactive ? onPreview : undefined}
+        onMore={interactive ? () => onEdit?.(task) : undefined}
+      />
+
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-white/50">
+        <span>Criada em {formatCreated(task.created_at)}</span>
         <span>
           {task.attachments.length} {task.attachments.length === 1 ? 'anexo' : 'anexos'}
         </span>
@@ -419,6 +465,18 @@ function CardContent({ task, showOwner, interactive = false, onHandlePointerDown
             </option>
           ))}
         </select>
+        {task.status !== 'DONE' && (
+          <button
+            type="button"
+            data-nodrag
+            disabled={!interactive}
+            onClick={() => onComplete?.(task)}
+            aria-label={`Concluir "${task.title}"`}
+            className="min-h-11 shrink-0 rounded-[0.333em] px-3 text-xs text-emerald-300 transition-colors hover:bg-emerald-500/15 md:min-h-0 md:px-2 md:py-1"
+          >
+            Concluir
+          </button>
+        )}
         <button
           type="button"
           data-nodrag

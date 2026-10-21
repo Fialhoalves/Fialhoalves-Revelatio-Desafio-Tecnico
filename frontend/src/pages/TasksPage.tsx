@@ -70,6 +70,9 @@ export default function TasksPage() {
       context?.snapshots.forEach(([key, data]) => queryClient.setQueryData(key, data))
       onMutationError(error)
     },
+    onSuccess: (_data, { status }) => {
+      if (status === 'DONE') toast.success('Tarefa concluída.')
+    },
     onSettled: refresh,
   })
 
@@ -142,6 +145,7 @@ export default function TasksPage() {
               statuses={filters.status ? [filters.status] : STATUS_ORDER}
               showOwner={isAdmin}
               onMove={(task, status) => move.mutate({ task, status })}
+              onComplete={(task) => move.mutate({ task, status: 'DONE' })}
               onEdit={setEditing}
               onDelete={setDeleting}
             />

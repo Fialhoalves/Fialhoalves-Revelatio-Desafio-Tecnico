@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react'
 import { attachmentsApi } from '../api/endpoints'
-import { downloadAttachment, isImage, isPdf, isPreviewable } from '../lib/download'
+import { downloadAttachment, isImage, isPdf, isPreviewable, isText } from '../lib/download'
 import { errorMessage } from '../lib/errors'
 import { formatSize } from '../lib/format'
 import type { Attachment } from '../types'
 import { Alert, Button, Modal, Spinner } from './ui'
 import { useToast } from './Toast'
 
+// Textos longos são cortados na tela; o arquivo completo continua disponível para download.
+const MAX_TEXT_CHARS = 20000
+
 export function AttachmentPreview({ attachment, onClose }: { attachment: Attachment; onClose: () => void }) {
   const toast = useToast()
   const previewable = isPreviewable(attachment)
   const [url, setUrl] = useState<string | null>(null)
+  const [text, setText] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -19,8 +23,12 @@ export function AttachmentPreview({ attachment, onClose }: { attachment: Attachm
     let cancelled = false
     attachmentsApi
       .fetchFile(attachment.id, true)
-      .then((blob) => {
+      .then(async (blob) => {
         if (cancelled) return
+        if (isText(attachment)) {
+          setText((await blob.text()).slice(0, MAX_TEXT_CHARS))
+          return
+        }
         objectUrl = URL.createObjectURL(blob)
         setUrl(objectUrl)
       })
@@ -29,9 +37,10 @@ export function AttachmentPreview({ attachment, onClose }: { attachment: Attachm
       cancelled = true
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
-  }, [attachment.id, previewable])
+  }, [attachment, previewable])
 
   const download = () => downloadAttachment(attachment).catch((err) => toast.error(errorMessage(err)))
+  const loading = previewable && !error && url === null && text === null
 
   return (
     <Modal title={attachment.original_name} onClose={onClose} size="lg">
@@ -41,12 +50,17 @@ export function AttachmentPreview({ attachment, onClose }: { attachment: Attachm
             <Alert>{error}</Alert>
           </div>
         )}
-        {!error && previewable && !url && <Spinner />}
+        {loading && <Spinner />}
         {url && isImage(attachment) && (
           <img src={url} alt={attachment.original_name} className="max-h-[65vh] max-w-full object-contain" />
         )}
         {url && isPdf(attachment) && (
           <iframe src={url} title={attachment.original_name} className="h-[65vh] w-full rounded-md bg-white" />
+        )}
+        {text !== null && (
+          <pre className="max-h-[65vh] w-full overflow-auto whitespace-pre-wrap break-words p-4 text-left font-mono text-xs text-white/80">
+            {text || 'Arquivo vazio.'}
+          </pre>
         )}
         {!previewable && (
           <p className="p-6 text-center text-sm text-white/60">

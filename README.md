@@ -176,6 +176,8 @@ pytest
 
 Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16 e valida as migrations.
 
+Detalhes de como os testes são feitos, o que cada arquivo cobre e por que esses casos estão em [docs/TESTING.md](docs/TESTING.md).
+
 Os testes cobrem autenticação, permissões entre perfis, CRUD de tarefas, filtros, upload e download de anexos, validações e cada código de erro do catálogo.
 
 ## API

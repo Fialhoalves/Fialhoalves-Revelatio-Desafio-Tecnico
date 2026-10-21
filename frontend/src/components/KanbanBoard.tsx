@@ -15,7 +15,7 @@ const MOVE_THRESHOLD = 6
 const SCROLL_EDGE = 90
 
 const compactSelect =
-  'block w-full rounded-[0.333em] border border-white/16 bg-white/5 px-2 py-1.5 text-base text-white transition-colors duration-[350ms] focus:border-white/70 focus:outline-none disabled:opacity-50 md:py-1 md:text-xs'
+  'block min-h-11 w-full rounded-[0.333em] border border-white/16 bg-white/5 px-2 py-1.5 text-base md:min-h-0 text-white transition-colors duration-[350ms] focus:border-white/70 focus:outline-none disabled:opacity-50 md:py-1 md:text-xs'
 
 interface Props {
   tasks: Task[]
@@ -364,7 +364,7 @@ function CardContent({ task, showOwner, interactive = false, onHandlePointerDown
             onClick={() => {
               if (!shouldSuppressClick?.()) onEdit?.(task)
             }}
-            className={`flex min-h-9 min-w-0 flex-1 items-center text-left text-sm leading-snug hover:underline md:min-h-0 md:items-start ${task.status === 'DONE' ? 'text-white/40 line-through' : ''}`}
+            className={`flex min-h-11 min-w-0 flex-1 items-center text-left text-sm leading-snug hover:underline md:min-h-0 md:items-start ${task.status === 'DONE' ? 'text-white/40 line-through' : ''}`}
           >
             {task.title}
           </button>
@@ -377,7 +377,7 @@ function CardContent({ task, showOwner, interactive = false, onHandlePointerDown
           aria-label={`Arrastar "${task.title}"`}
           onPointerDown={onHandlePointerDown}
           tabIndex={interactive ? 0 : -1}
-          className="-mt-1 -mr-1 flex size-9 shrink-0 touch-none items-center justify-center rounded-[0.333em] text-white/40 transition-colors hover:bg-white/10 hover:text-white/80 md:size-7 md:cursor-grab"
+          className="-mt-1 -mr-1 flex size-11 shrink-0 touch-none items-center justify-center rounded-[0.333em] text-white/40 transition-colors hover:bg-white/10 hover:text-white/80 md:size-7 md:cursor-grab"
         >
           <svg viewBox="0 0 16 16" className="size-4" fill="currentColor" aria-hidden="true">
             <circle cx="5.5" cy="3.5" r="1.2" />
@@ -425,7 +425,7 @@ function CardContent({ task, showOwner, interactive = false, onHandlePointerDown
           disabled={!interactive}
           onClick={() => onDelete?.(task)}
           aria-label={`Excluir "${task.title}"`}
-          className="min-h-9 shrink-0 rounded-[0.333em] px-3 text-xs text-red-300 transition-colors hover:bg-red-500/15 md:min-h-0 md:px-2 md:py-1"
+          className="min-h-11 shrink-0 rounded-[0.333em] px-3 text-xs text-red-300 transition-colors hover:bg-red-500/15 md:min-h-0 md:px-2 md:py-1"
         >
           Excluir
         </button>

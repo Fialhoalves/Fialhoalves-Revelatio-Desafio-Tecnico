@@ -5,6 +5,7 @@ import { ApiError, errorMessage, fieldErrors } from '../lib/errors'
 import { ACCEPTED_TYPES, checkFile, formatSize, PRIORITY_LABEL, STATUS_LABEL } from '../lib/format'
 import type { Attachment, Priority, Task, TaskInput, TaskStatus } from '../types'
 import { AttachmentPreview } from './AttachmentPreview'
+import { SelectedFileItem } from './SelectedFileItem'
 import { useToast } from './Toast'
 import { Alert, Button, Field, inputClass, Modal, Spinner } from './ui'
 
@@ -223,20 +224,13 @@ export function TaskFormDialog({ task, onClose, onChanged }: Props) {
               </ul>
             )}
             {files.length > 0 && (
-              <ul className="mt-2 space-y-1">
+              <ul className="mt-2 space-y-2">
                 {files.map((file, index) => (
-                  <li key={`${file.name}-${index}`} className="flex items-center justify-between rounded-md bg-white/6 px-3 py-1.5 text-sm">
-                    <span className="truncate">
-                      {file.name} <span className="text-xs text-white/60">({formatSize(file.size)})</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}
-                      className="ml-2 text-xs text-red-300 hover:underline"
-                    >
-                      Remover
-                    </button>
-                  </li>
+                  <SelectedFileItem
+                    key={`${file.name}-${file.size}-${index}`}
+                    file={file}
+                    onRemove={() => setFiles((current) => current.filter((_, i) => i !== index))}
+                  />
                 ))}
               </ul>
             )}

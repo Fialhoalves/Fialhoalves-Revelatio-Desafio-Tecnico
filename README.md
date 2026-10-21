@@ -1,12 +1,16 @@
 # Task Manager
 
-API REST para organização de tarefas com anexos, autenticação e controle de acesso por perfil. Desenvolvida como desafio técnico para a vaga de Back-End da Revelatio Studio.
+API REST e interface web para organização de tarefas com anexos, autenticação e controle de acesso por perfil. Desenvolvida como desafio técnico para a vaga de Back-End da Revelatio Studio.
 
 ## Visão geral
 
 Cada usuário cadastra e acompanha suas tarefas (título, descrição, prazo, status e prioridade) e pode anexar imagens e documentos a elas. Usuários comuns enxergam apenas as próprias tarefas. Administradores enxergam e gerenciam as tarefas de todos.
 
 Toda a autenticação e a autorização acontecem no servidor. O front-end apenas envia o token recebido no login.
+
+## Interface
+
+O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastro, painel de resumo, lista com filtros, busca, ordenação e paginação, formulário de tarefa com anexos, preview de imagens e PDF, e visão de administrador com o dono de cada tarefa e o resumo por usuário. Detalhes em [frontend/README.md](frontend/README.md).
 
 ## Funcionalidades
 
@@ -44,6 +48,10 @@ Token de acesso com expiração configurável e senhas armazenadas apenas como h
 
 Os arquivos ficam em disco (volume no Docker) com nome gerado por UUID, e os metadados ficam no banco. O acesso é encapsulado em `app/storage`, atrás de uma interface pequena, o que permite trocar por um serviço de objetos sem alterar as rotas. Downloads sempre passam pela API, que confere a permissão antes de servir o arquivo.
 
+### React, Vite e Tailwind
+
+O front-end é uma SPA independente da API, publicada na Vercel. O TanStack Query cuida de cache e atualização das listas, e um cliente HTTP único converte os erros da API em mensagens para o usuário a partir do código do erro.
+
 ### Docker
 
 `docker compose up` sobe API e banco com migrations e seed aplicados. A mesma imagem da API é usada no deploy.
@@ -51,6 +59,7 @@ Os arquivos ficam em disco (volume no Docker) com nome gerado por UUID, e os met
 ## Arquitetura
 
 ```
+frontend/            interface em React (src/api, components, pages, lib)
 backend/
   app/
     main.py          criação da aplicação, middlewares e routers
@@ -135,6 +144,19 @@ O seed cria dois usuários de demonstração:
 |---|---|---|
 | Administrador | admin@example.com | admin12345 |
 | Usuário comum | user@example.com | user12345 |
+
+### Interface
+
+Com a API no ar:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+A interface abre em http://localhost:5173.
 
 ### Sem Docker
 
@@ -222,6 +244,7 @@ Partes do projeto em que foi usada:
 - estrutura inicial do backend, modelos, rotas e serviços;
 - testes automatizados;
 - migrations e arquivos de Docker;
+- interface em React (componentes, cliente HTTP e tratamento de erros);
 - rascunho dos documentos em `docs/` e deste README.
 
 Foram definidos manualmente a stack, o modelo de acesso (regras de dono e administrador), o contrato de erros e o escopo dos diferenciais. O código gerado foi executado, testado e revisado antes de cada commit.

@@ -2,6 +2,23 @@
 
 API REST e interface web para organização de tarefas com anexos, autenticação e controle de acesso por perfil. Desenvolvida como desafio técnico para a vaga de Back-End da Revelatio Studio.
 
+## Demonstração
+
+| Recurso | Endereço |
+|---|---|
+| Interface | https://fialhoalves-revelatio-desafio-tecni.vercel.app |
+| API e documentação (Swagger) | https://taskmanager-api-2gkp.onrender.com/docs |
+| Vídeo de apresentação | a definir |
+
+Contas de demonstração no ambiente publicado (dados fictícios, apenas para avaliação):
+
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Administrador | admin@example.com | Revelatio-Admin-2026 |
+| Usuário comum | user@example.com | Revelatio-User-2026 |
+
+Qualquer pessoa pode criar uma conta nova pelo cadastro, que sempre cria um usuário comum. O plano gratuito do Render coloca a API em repouso após 15 minutos sem uso, e a primeira requisição depois disso pode levar cerca de um minuto.
+
 ## Visão geral
 
 Cada usuário cadastra e acompanha suas tarefas (título, descrição, prazo, status e prioridade) e pode anexar imagens e documentos a elas. Usuários comuns enxergam apenas as próprias tarefas. Administradores enxergam e gerenciam as tarefas de todos.
@@ -17,7 +34,7 @@ O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastr
 - Cadastro e login com JWT.
 - Dois perfis: `USER` e `ADMIN`.
 - CRUD de tarefas, com atalho para concluir.
-- Filtros por status, prioridade, prazo, atraso e dono (admin), busca por texto, ordenação e paginação.
+- Filtros por status, prioridade, prazo, atraso e dono (admin), busca por texto, ordenação e paginação (`limit` e `offset`).
 - Estatísticas por status e prioridade, com resumo por usuário para administradores.
 - Upload, listagem, download e remoção de anexos, com preview via `?inline=true`.
 - Validação de anexos por tipo, tamanho e assinatura do conteúdo.
@@ -55,7 +72,7 @@ O acesso é encapsulado em `app/storage`, atrás de uma interface pequena (`save
 
 ### React, Vite e Tailwind
 
-O front-end é uma SPA independente da API, publicada na Vercel. O TanStack Query cuida de cache e atualização das listas, e um cliente HTTP único converte os erros da API em mensagens para o usuário a partir do código do erro.
+O front-end é uma SPA independente da API, publicada na Vercel. O TanStack Query cuida de cache e atualização do quadro, e um cliente HTTP único converte os erros da API em mensagens para o usuário a partir do código do erro.
 
 ### Docker
 
@@ -79,7 +96,9 @@ backend/
   alembic/           migrations
   tests/             testes automatizados
 docs/                documentação complementar
-docker-compose.yml
+docker-compose.yml  API e banco para execução local
+render.yaml          blueprint de deploy da API
+.github/workflows/   integração contínua
 ```
 
 Fluxo de uma requisição: o router recebe e valida a entrada, as dependências resolvem o usuário autenticado, o service aplica as regras de acesso e de negócio e o resultado é serializado por um schema.
@@ -194,6 +213,7 @@ Os valores de exemplo estão em `backend/.env.example`.
 | `UPLOAD_DIR` | Pasta dos anexos (backend `local`) | `uploads` |
 | `MAX_UPLOAD_MB` | Tamanho máximo por arquivo | `10` |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Administrador criado pelo seed | `admin@example.com`, `admin12345` |
+| `DEMO_USER_EMAIL`, `DEMO_USER_PASSWORD` | Usuário comum criado pelo seed | `user@example.com`, `user12345` |
 
 ## Testes
 
@@ -202,11 +222,9 @@ cd backend
 pytest
 ```
 
-Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16 e valida as migrations.
+São 94 execuções (65 cenários distintos): autenticação, permissões entre perfis, CRUD de tarefas, filtros e estatísticas, upload e download de anexos nos dois backends de armazenamento, validações e cada código de erro do catálogo. Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16, valida as migrations e compila o front-end.
 
 Detalhes de como os testes são feitos, o que cada arquivo cobre e por que esses casos estão em [docs/TESTING.md](docs/TESTING.md).
-
-Os testes cobrem autenticação, permissões entre perfis, CRUD de tarefas, filtros, upload e download de anexos, validações e cada código de erro do catálogo.
 
 ## API
 
@@ -236,41 +254,29 @@ Os erros seguem o formato e o catálogo descritos em [docs/ERRORS.md](docs/ERROR
 
 ## Deploy
 
-A API roda no Render, a partir do blueprint `render.yaml`, com PostgreSQL gerenciado e anexos armazenados no banco (`STORAGE_BACKEND=database`). O front-end é publicado na Vercel.
+A API roda no Render, a partir do blueprint `render.yaml`, com PostgreSQL gerenciado e anexos armazenados no banco (`STORAGE_BACKEND=database`), porque o disco do plano gratuito é apagado a cada reinício. O front-end é publicado na Vercel. Os endereços estão no bloco "Demonstração".
 
 Passos:
 
 1. Render: criar um Blueprint apontando para este repositório. Informar `CORS_ORIGINS` (URL da Vercel), `ADMIN_PASSWORD` e `DEMO_USER_PASSWORD` quando solicitado. A migration e o seed rodam na inicialização.
 2. Vercel: importar o repositório com Root Directory `frontend` e a variável `VITE_API_URL` apontando para a URL da API.
-3. No plano gratuito do Render a API entra em repouso após 15 minutos sem uso, e a primeira requisição seguinte pode levar cerca de um minuto.
-
-- Front-end: https://fialhoalves-revelatio-desafio-tecni.vercel.app
-- API: https://taskmanager-api-2gkp.onrender.com (documentação em `/docs`)
-
-O plano gratuito do Render coloca a API em repouso após 15 minutos sem uso. A primeira requisição depois disso pode levar cerca de um minuto.
-
-Contas de demonstração no ambiente publicado (dados fictícios, apenas para avaliação):
-
-| Perfil | E-mail | Senha |
-|---|---|---|
-| Administrador | admin@example.com | Revelatio-Admin-2026 |
-| Usuário comum | user@example.com | Revelatio-User-2026 |
-
-As senhas do ambiente local (Docker) são as descritas em "Como executar". Qualquer pessoa pode criar uma conta nova pelo cadastro, que sempre cria um usuário comum.
+3. Render: ajustar `CORS_ORIGINS` para a URL final da Vercel, se ela diferir da informada no passo 1.
 
 ## Uso de IA
 
-Ferramenta utilizada: Claude Code, como assistente de programação no terminal.
+Ferramenta utilizada: Claude Code, como assistente de programação.
 
 Partes do projeto em que foi usada:
 
 - estrutura inicial do backend, modelos, rotas e serviços;
 - testes automatizados;
-- migrations e arquivos de Docker;
-- interface em React (componentes, cliente HTTP e tratamento de erros);
+- migrations e arquivos de Docker, CI e deploy;
+- interface em React: componentes, cliente HTTP, tratamento de erros, quadro kanban e visual;
 - rascunho dos documentos em `docs/` e deste README.
 
-Foram definidos manualmente a stack, o modelo de acesso (regras de dono e administrador), o contrato de erros e o escopo dos diferenciais. O código gerado foi executado, testado e revisado antes de cada commit.
+Como ajudou: acelerou a montagem da estrutura e a escrita dos testes e da documentação, e permitiu iterar rápido sobre decisões, como a troca do armazenamento de anexos em disco por um backend em PostgreSQL quando o provedor de deploy inicial ficou indisponível.
+
+O que ficou sob responsabilidade do autor: a escolha da stack, as regras de acesso entre dono e administrador, o contrato de erros, o escopo dos diferenciais e o comportamento da interface (como o quadro kanban). Cada entrega foi executada, testada pela suíte automatizada e conferida no navegador antes de ser commitada. A conferência também encontrou falhas no código gerado, corrigidas no processo: um teste de autenticação por rota que não executava nenhum caso por causa de uma mudança no framework, e um diálogo que tirava o foco do primeiro campo.
 
 ## Vídeo de apresentação
 
@@ -282,3 +288,5 @@ Link: a definir
 - O limite de tentativas de login fica em memória do processo e não é compartilhado entre instâncias.
 - O token de acesso não possui refresh nem revogação.
 - A validação de anexos confere a assinatura do conteúdo, mas não faz varredura de malware.
+- O front-end não tem testes automatizados; foi verificado manualmente no navegador, incluindo a visão de celular.
+- O quadro carrega até 100 tarefas por consulta e avisa quando há mais.

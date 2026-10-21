@@ -27,7 +27,7 @@ Toda a autenticação e a autorização acontecem no servidor. O front-end apena
 
 ## Interface
 
-O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastro, painel de resumo, quadro kanban (Pendente, Em andamento e Concluída) com arrastar e soltar por mouse ou toque, filtros (busca por texto, status, prioridade, prazo vencido e dono), ordenação, formulário de tarefa com anexos e conferência dos arquivos antes de enviar, preview de imagens e PDF, e visão de administrador com o dono de cada tarefa e o resumo por usuário. Detalhes em [frontend/README.md](frontend/README.md).
+O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastro, painel de resumo, quadro kanban (Pendente, Em andamento e Concluída) com arrastar e soltar por mouse ou toque, filtros (busca por texto, status, prioridade, prazo vencido e dono), ordenação, formulário de tarefa com anexos e conferência dos arquivos antes de enviar, preview de imagens e PDF, e visão de administrador com o dono de cada tarefa, o resumo por usuário e uma tela com a lista de usuários e seus perfis (o menu de seções só aparece para administradores; a restrição real é da API). Detalhes em [frontend/README.md](frontend/README.md).
 
 ## Funcionalidades
 

@@ -52,6 +52,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+_default_openapi = app.openapi
+
+
+def openapi_with_file_inputs() -> dict:
+    """O FastAPI descreve arquivos como `contentMediaType`, que o Swagger UI não transforma em seletor
+    de arquivo dentro de listas. Marcar o campo como `binary` faz o Swagger mostrar o botão de upload."""
+    schema = _default_openapi()
+    for body in schema.get("components", {}).get("schemas", {}).values():
+        for prop in body.get("properties", {}).values():
+            for node in (prop, prop.get("items", {})):
+                if node.get("contentMediaType") == "application/octet-stream":
+                    node["format"] = "binary"
+    return schema
+
+
+app.openapi = openapi_with_file_inputs
+
+
 @app.get("/", include_in_schema=False)
 def root():
     """A raiz leva à documentação interativa."""

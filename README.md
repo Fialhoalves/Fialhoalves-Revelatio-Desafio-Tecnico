@@ -8,7 +8,8 @@ API REST e interface web para organização de tarefas com anexos, autenticaçã
 |---|---|
 | Interface | https://fialhoalves-revelatio-desafio-tecni.vercel.app |
 | API e documentação (Swagger) | https://taskmanager-api-2gkp.onrender.com/docs |
-| Vídeo de apresentação | a definir |
+| Vídeo de apresentação | https://youtu.be/qXmH14qhYcc |
+| Slides da apresentação | [docs/apresentacao.pdf](docs/apresentacao.pdf) |
 
 Contas de demonstração no ambiente publicado (dados fictícios, apenas para avaliação):
 
@@ -17,7 +18,7 @@ Contas de demonstração no ambiente publicado (dados fictícios, apenas para av
 | Administrador | admin@example.com | Revelatio-Admin-2026 |
 | Usuário comum | user@example.com | Revelatio-User-2026 |
 
-O ambiente publicado já vem com dados de exemplo (tarefas em todos os status e anexos de imagem, PDF, CSV e TXT). Há também duas contas de usuário comum para o administrador comparar no resumo por usuário: `ana@example.com` e `bruno@example.com`, com a mesma senha do usuário comum. Qualquer pessoa pode criar uma conta nova pelo cadastro, que sempre cria um usuário comum. O plano gratuito do Render coloca a API em repouso após 15 minutos sem uso, e a primeira requisição depois disso pode levar cerca de um minuto.
+O ambiente publicado já vem com dados de exemplo (tarefas em todos os status e anexos de imagem, PDF, CSV, TXT, Word e Excel). Há também duas contas de usuário comum para o administrador comparar no resumo por usuário: `ana@example.com` e `bruno@example.com`, com a mesma senha do usuário comum. Qualquer pessoa pode criar uma conta nova pelo cadastro, que sempre cria um usuário comum. O plano gratuito do Render coloca a API em repouso após 15 minutos sem uso, e a primeira requisição depois disso pode levar cerca de um minuto.
 
 ## Visão geral
 
@@ -291,7 +292,7 @@ O que ficou sob responsabilidade do autor: a escolha da stack, as regras de aces
 
 ## Vídeo de apresentação
 
-Link: a definir
+Link: https://youtu.be/qXmH14qhYcc (cerca de 6 minutos, vídeo não listado). Os slides usados na apresentação estão em [docs/apresentacao.pdf](docs/apresentacao.pdf).
 
 ## Limitações conhecidas
 

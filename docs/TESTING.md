@@ -4,7 +4,7 @@
 
 ```bash
 cd backend
-pytest                                   # SQLite em memória, cerca de 30 segundos
+pytest                                   # SQLite em memória, cerca de um minuto
 TEST_DATABASE_URL=postgresql+psycopg://usuario:senha@localhost:5432/banco_de_teste pytest
 ```
 

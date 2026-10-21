@@ -5,12 +5,12 @@ from app.core.config import get_settings
 from app.core.errors import AttachmentNotFound, FileContentMismatch, FileTypeNotAllowed
 from app.models import Attachment, Role, Task, User
 from app.services.file_signature import matches_declared_type
-from app.storage.local import LocalStorage
+from app.storage import Storage
 
 SIGNATURE_BYTES = 2048
 
 
-def add_attachment(db: Session, storage: LocalStorage, task: Task, file: UploadFile) -> Attachment:
+def add_attachment(db: Session, storage: Storage, task: Task, file: UploadFile) -> Attachment:
     content_type = (file.content_type or "").lower()
     if content_type not in get_settings().allowed_content_types:
         raise FileTypeNotAllowed(f"O tipo de arquivo '{content_type or 'desconhecido'}' não é permitido.")
@@ -48,7 +48,7 @@ def get_accessible_attachment(db: Session, user: User, attachment_id: int) -> At
     return attachment
 
 
-def delete_attachment(db: Session, storage: LocalStorage, attachment: Attachment) -> None:
+def delete_attachment(db: Session, storage: Storage, attachment: Attachment) -> None:
     stored_name = attachment.stored_name
     db.delete(attachment)
     db.commit()

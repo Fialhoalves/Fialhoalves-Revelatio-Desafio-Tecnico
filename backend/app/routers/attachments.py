@@ -1,19 +1,20 @@
 from typing import Annotated
 
+from urllib.parse import quote
+
 from fastapi import APIRouter, Depends, Query, Response, UploadFile, status
-from fastapi.responses import FileResponse
 
 from app.core.deps import CurrentUser, DbSession
 from app.core.errors import AttachmentFileMissing, error_responses
 from app.schemas.attachment import AttachmentOut
 from app.services import attachments as attachment_service
 from app.services.tasks import get_accessible_task
+from app.storage import Storage as StorageBackend
 from app.storage import get_storage
-from app.storage.local import LocalStorage
 
 router = APIRouter(tags=["attachments"], responses=error_responses(401, 404, 413, 415))
 
-Storage = Annotated[LocalStorage, Depends(get_storage)]
+Storage = Annotated[StorageBackend, Depends(get_storage)]
 
 
 @router.post(
@@ -41,14 +42,14 @@ def download_attachment(
     inline: Annotated[bool, Query(description="true para exibir no navegador (preview)")] = False,
 ):
     attachment = attachment_service.get_accessible_attachment(db, user, attachment_id)
-    path = storage.path(attachment.stored_name)
-    if not path.exists():
+    content = storage.read(attachment.stored_name)
+    if content is None:
         raise AttachmentFileMissing()
-    return FileResponse(
-        path,
+    disposition = "inline" if inline else "attachment"
+    return Response(
+        content=content,
         media_type=attachment.content_type,
-        filename=attachment.original_name,
-        content_disposition_type="inline" if inline else "attachment",
+        headers={"Content-Disposition": f"{disposition}; filename*=UTF-8''{quote(attachment.original_name)}"},
     )
 
 

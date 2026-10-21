@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import TaskNotFound
 from app.models import Priority, Role, Task, TaskStatus, User
 from app.schemas.task import OwnerStats, TaskCreate, TaskStats, TaskUpdate
-from app.storage.local import LocalStorage
+from app.storage import Storage
 
 
 class SortField(str, enum.Enum):
@@ -149,7 +149,7 @@ def update_task(db: Session, task: Task, data: TaskUpdate) -> Task:
     return task
 
 
-def delete_task(db: Session, storage: LocalStorage, task: Task) -> None:
+def delete_task(db: Session, storage: Storage, task: Task) -> None:
     stored_names = [a.stored_name for a in task.attachments]
     db.delete(task)
     db.commit()

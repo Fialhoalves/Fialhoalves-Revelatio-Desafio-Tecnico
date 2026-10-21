@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -23,6 +24,8 @@ class Settings(BaseSettings):
     # Origens permitidas no CORS, separadas por vírgula (ex.: URL da Vercel).
     cors_origins: str = "http://localhost:5173"
 
+    # "local" grava em disco (UPLOAD_DIR); "database" grava no PostgreSQL, para hospedagens com disco efêmero.
+    storage_backend: Literal["local", "database"] = "local"
     upload_dir: str = "uploads"
     max_upload_mb: int = 10
     allowed_content_types: tuple[str, ...] = (

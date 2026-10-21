@@ -31,18 +31,23 @@ def reset_login_limiter():
 
 
 @pytest.fixture
-def db_session():
+def db_engine():
     if TEST_DATABASE_URL.startswith("sqlite"):
         engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool)
     else:
         engine = create_engine(TEST_DATABASE_URL)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
-    session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)()
-    yield session
-    session.close()
+    yield engine
     Base.metadata.drop_all(engine)
     engine.dispose()
+
+
+@pytest.fixture
+def db_session(db_engine):
+    session = sessionmaker(bind=db_engine, autoflush=False, expire_on_commit=False)()
+    yield session
+    session.close()
 
 
 @pytest.fixture

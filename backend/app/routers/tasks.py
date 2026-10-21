@@ -9,12 +9,12 @@ from app.models import Priority, TaskStatus
 from app.schemas.task import TaskCreate, TaskOut, TaskPage, TaskStats, TaskUpdate
 from app.services import tasks as task_service
 from app.services.tasks import SortField, SortOrder
+from app.storage import Storage as StorageBackend
 from app.storage import get_storage
-from app.storage.local import LocalStorage
 
 router = APIRouter(prefix="/tasks", tags=["tasks"], responses=error_responses(401, 404))
 
-Storage = Annotated[LocalStorage, Depends(get_storage)]
+Storage = Annotated[StorageBackend, Depends(get_storage)]
 
 
 @router.post("", response_model=TaskOut, status_code=status.HTTP_201_CREATED)

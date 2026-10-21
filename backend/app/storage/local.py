@@ -42,5 +42,9 @@ class LocalStorage:
     def path(self, stored_name: str) -> Path:
         return self.base_dir / stored_name
 
+    def read(self, stored_name: str) -> bytes | None:
+        target = self.path(stored_name)
+        return target.read_bytes() if target.is_file() else None
+
     def delete(self, stored_name: str) -> None:
         self.path(stored_name).unlink(missing_ok=True)

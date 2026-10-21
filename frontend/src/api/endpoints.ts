@@ -1,7 +1,8 @@
 import type { Attachment, Task, TaskFilters, TaskInput, TaskPage, TaskStats, User } from '../types'
 import { request, requestBlob } from './client'
 
-export const PAGE_SIZE = 10
+// O quadro mostra todas as colunas de uma vez, então busca o máximo que a API devolve por requisição.
+export const BOARD_LIMIT = 100
 
 export const authApi = {
   login: (email: string, password: string) =>
@@ -20,12 +21,11 @@ export const usersApi = {
 }
 
 export const tasksApi = {
-  list: (filters: TaskFilters, limit = PAGE_SIZE) => {
+  list: (filters: TaskFilters) => {
     const params = new URLSearchParams({
       sort: filters.sort,
       order: filters.order,
-      limit: String(limit),
-      offset: String((filters.page - 1) * limit),
+      limit: String(BOARD_LIMIT),
     })
     if (filters.q.trim()) params.set('q', filters.q.trim())
     if (filters.status) params.set('status', filters.status)

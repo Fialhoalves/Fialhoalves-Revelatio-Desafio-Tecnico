@@ -68,5 +68,4 @@ export interface TaskFilters {
   owner_id: number | ''
   sort: 'created_at' | 'due_date' | 'priority' | 'title'
   order: 'asc' | 'desc'
-  page: number
 }

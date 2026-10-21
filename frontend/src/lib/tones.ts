@@ -2,12 +2,6 @@ import type { Priority, TaskStatus } from '../types'
 
 export type Tone = 'slate' | 'blue' | 'green' | 'amber' | 'red' | 'indigo'
 
-export const STATUS_TONE: Record<TaskStatus, Tone> = {
-  PENDING: 'amber',
-  IN_PROGRESS: 'blue',
-  DONE: 'green',
-}
-
 export const PRIORITY_TONE: Record<Priority, Tone> = {
   LOW: 'slate',
   MEDIUM: 'indigo',

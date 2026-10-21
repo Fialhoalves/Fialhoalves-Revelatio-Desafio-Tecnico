@@ -9,11 +9,11 @@ function AuthLayout({ title, subtitle, children }: { title: string; subtitle: st
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Task Manager</p>
-          <h1 className="mt-2 text-2xl font-semibold">{title}</h1>
-          <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+          <p className="inline-block rounded-[0.333em] bg-white/16 px-3.5 py-2 text-[13px] backdrop-blur-xl">Task Manager</p>
+          <h1 className="mt-6 text-5xl tracking-[-0.04em]">{title}</h1>
+          <p className="mt-2 text-sm text-white/60">{subtitle}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">{children}</div>
+        <div className="animate-rise rounded-md border border-white/12 bg-white/4 p-6">{children}</div>
       </div>
     </main>
   )
@@ -83,13 +83,13 @@ export function LoginPage() {
           />
         </Field>
         <Button type="submit" className="w-full" disabled={submitting || wait > 0}>
-          {submitting && <Spinner className="size-4 border-white/40 border-t-white" />}
+          {submitting && <Spinner className="size-4" />}
           {wait > 0 ? `Tente novamente em ${minutes}:${seconds}` : 'Entrar'}
         </Button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-600">
+      <p className="mt-4 text-center text-sm text-white/60">
         Não tem conta?{' '}
-        <Link to="/cadastro" className="font-medium text-indigo-600 hover:underline">
+        <Link to="/cadastro" className="text-white underline underline-offset-4 hover:text-white/70">
           Cadastre-se
         </Link>
       </p>
@@ -153,13 +153,13 @@ export function RegisterPage() {
           />
         </Field>
         <Button type="submit" className="w-full" disabled={submitting}>
-          {submitting && <Spinner className="size-4 border-white/40 border-t-white" />}
+          {submitting && <Spinner className="size-4" />}
           Criar conta
         </Button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-600">
+      <p className="mt-4 text-center text-sm text-white/60">
         Já tem conta?{' '}
-        <Link to="/login" className="font-medium text-indigo-600 hover:underline">
+        <Link to="/login" className="text-white underline underline-offset-4 hover:text-white/70">
           Entrar
         </Link>
       </p>

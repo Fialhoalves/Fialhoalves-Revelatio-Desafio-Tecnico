@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { CircleCursor } from './components/CircleCursor'
 import { Spinner } from './components/ui'
 import { useAuth } from './contexts/AuthContext'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
@@ -28,11 +29,14 @@ function PublicOnly({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
-      <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
-      <Route path="/" element={<Protected><TasksPage /></Protected>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <CircleCursor />
+      <Routes>
+        <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
+        <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
+        <Route path="/" element={<Protected><TasksPage /></Protected>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   )
 }

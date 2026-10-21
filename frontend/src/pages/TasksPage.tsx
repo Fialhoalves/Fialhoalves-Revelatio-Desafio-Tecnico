@@ -94,11 +94,15 @@ export default function TasksPage() {
   return (
     <>
       <AppHeader />
-      <main className="mx-auto max-w-5xl space-y-5 px-4 py-6">
+      <main className="mx-auto max-w-5xl space-y-5 px-4 pt-6 pb-16">
+        <h2 className="animate-rise text-4xl tracking-[-0.04em] sm:text-5xl">
+          {isAdmin ? 'Tarefas de todos os usuários' : 'Minhas tarefas'}
+        </h2>
+
         {stats.data && <StatsCards stats={stats.data} />}
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">{isAdmin ? 'Tarefas de todos os usuários' : 'Minhas tarefas'}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+          <p className="text-sm text-white/60">{tasks.data ? `${total} ${total === 1 ? 'tarefa' : 'tarefas'}` : ''}</p>
           <Button onClick={() => setEditing('new')}>Nova tarefa</Button>
         </div>
 
@@ -109,15 +113,15 @@ export default function TasksPage() {
         {tasks.isPending && (
           <div className="space-y-3" aria-busy="true">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-28 animate-pulse rounded-xl bg-slate-200/70" />
+              <div key={i} className="h-28 animate-pulse rounded-md bg-white/6" />
             ))}
           </div>
         )}
 
         {tasks.data && tasks.data.items.length === 0 && (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="font-medium">{hasActiveFilters ? 'Nenhuma tarefa encontrada' : 'Você ainda não tem tarefas'}</p>
-            <p className="mt-1 text-sm text-slate-500">
+          <div className="rounded-md border border-dashed border-white/20 p-10 text-center">
+            <p className="text-lg tracking-tight">{hasActiveFilters ? 'Nenhuma tarefa encontrada' : 'Você ainda não tem tarefas'}</p>
+            <p className="mt-1 text-sm text-white/60">
               {hasActiveFilters ? 'Ajuste ou limpe os filtros para ver mais resultados.' : 'Crie a primeira para começar a se organizar.'}
             </p>
             <div className="mt-4">
@@ -134,9 +138,10 @@ export default function TasksPage() {
 
         {tasks.data && tasks.data.items.length > 0 && (
           <div className={`space-y-3 transition-opacity ${tasks.isPlaceholderData ? 'opacity-60' : ''}`}>
-            {tasks.data.items.map((task) => (
+            {tasks.data.items.map((task, index) => (
               <TaskCard
                 key={task.id}
+                index={index}
                 task={task}
                 showOwner={isAdmin}
                 busy={complete.isPending || remove.isPending}
@@ -153,7 +158,7 @@ export default function TasksPage() {
             <Button variant="secondary" disabled={filters.page <= 1} onClick={() => patchFilters({ page: filters.page - 1 })}>
               Anterior
             </Button>
-            <span className="text-sm text-slate-600">
+            <span className="text-sm text-white/60">
               Página {filters.page} de {totalPages} · {total} tarefas
             </span>
             <Button

@@ -15,10 +15,10 @@ interface ToastApi {
 
 const ToastContext = createContext<ToastApi | null>(null)
 
-const STYLES: Record<ToastKind, string> = {
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  error: 'border-red-200 bg-red-50 text-red-800',
-  info: 'border-blue-200 bg-blue-50 text-blue-800',
+const DOTS: Record<ToastKind, string> = {
+  success: 'bg-emerald-400',
+  error: 'bg-red-400',
+  info: 'bg-white',
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -46,9 +46,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((item) => (
           <div
             key={item.id}
-            className={`pointer-events-auto w-full max-w-md rounded-lg border px-4 py-3 text-sm shadow-lg ${STYLES[item.kind]}`}
+            className="pointer-events-auto flex w-full max-w-md animate-rise items-start gap-3 rounded-md border border-white/12 bg-[#1d1d1d]/60 px-4 py-3 text-sm text-white backdrop-blur-xl"
           >
-            {item.message}
+            <span aria-hidden="true" className={`mt-1.5 size-1.5 shrink-0 rounded-full ${DOTS[item.kind]}`} />
+            <span>{item.message}</span>
           </div>
         ))}
       </div>

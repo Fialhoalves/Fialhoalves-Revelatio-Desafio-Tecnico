@@ -1,38 +1,43 @@
-import { useEffect, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { Children, useEffect, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { ScrambleText } from './ScrambleText'
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost'
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-300',
-  secondary: 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 disabled:text-slate-400',
-  danger: 'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300',
-  ghost: 'text-slate-600 hover:bg-slate-100 disabled:text-slate-400',
+  primary: 'bg-white text-black hover:bg-white/80 disabled:bg-white/30',
+  secondary: 'bg-white/16 text-white backdrop-blur hover:bg-white/25 disabled:text-white/40 disabled:hover:bg-white/16',
+  outline: 'border border-white/60 text-white hover:bg-white/10 disabled:border-white/20 disabled:text-white/40',
+  danger: 'bg-red-500/15 text-red-300 hover:bg-red-500/25 disabled:text-red-300/40 disabled:hover:bg-red-500/15',
+  ghost: 'text-white/70 hover:bg-white/10 hover:text-white disabled:text-white/30 disabled:hover:bg-transparent',
 }
 
 export function Button({
   variant = 'primary',
   className = '',
+  children,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed ${VARIANTS[variant]} ${className}`}
-    />
+      className={`inline-flex items-center justify-center gap-2 rounded-[0.333em] px-3.5 py-2 text-[13px] transition-colors duration-[350ms] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed ${VARIANTS[variant]} ${className}`}
+    >
+      {Children.map(children, (child) => (typeof child === 'string' ? <ScrambleText text={child} /> : child))}
+    </button>
   )
 }
 
 export const inputClass =
-  'block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-2 focus:outline-indigo-500/30 disabled:bg-slate-100'
+  'block w-full rounded-[0.333em] border border-white/16 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 transition-colors duration-[350ms] focus:border-white/70 focus:outline-none disabled:opacity-50'
 
 export function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-xs text-white/60">{label}</span>
       {children}
-      {hint && !error && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
+      {hint && !error && <span className="mt-1 block text-xs text-white/50">{hint}</span>}
       {error && (
-        <span role="alert" className="mt-1 block text-xs text-red-600">
+        <span role="alert" className="mt-1 block text-xs text-red-300">
           {error}
         </span>
       )}
@@ -45,28 +50,29 @@ export function Spinner({ className = '' }: { className?: string }) {
     <span
       role="status"
       aria-label="Carregando"
-      className={`inline-block size-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600 ${className}`}
+      className={`inline-block size-5 animate-spin rounded-full border-2 border-current/25 border-t-current ${className}`}
     />
   )
 }
 
+// A cor identifica o estado; o formato (chip fino, quase quadrado) segue o resto da interface.
 const TONES = {
-  slate: 'bg-slate-100 text-slate-700',
-  blue: 'bg-blue-100 text-blue-700',
-  green: 'bg-emerald-100 text-emerald-700',
-  amber: 'bg-amber-100 text-amber-800',
-  red: 'bg-red-100 text-red-700',
-  indigo: 'bg-indigo-100 text-indigo-700',
+  slate: 'border-white/16 text-white/70',
+  blue: 'border-sky-400/30 bg-sky-400/10 text-sky-300',
+  green: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
+  amber: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+  red: 'border-red-400/30 bg-red-400/10 text-red-300',
+  indigo: 'border-white/30 bg-white/10 text-white',
 }
 
 export function Badge({ tone = 'slate', children }: { tone?: keyof typeof TONES; children: ReactNode }) {
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${TONES[tone]}`}>{children}</span>
+  return <span className={`inline-flex items-center rounded-[3px] border px-2 py-0.5 text-[11px] ${TONES[tone]}`}>{children}</span>
 }
 
 export function Alert({ tone = 'error', children }: { tone?: 'error' | 'info'; children: ReactNode }) {
-  const style = tone === 'error' ? 'border-red-200 bg-red-50 text-red-700' : 'border-blue-200 bg-blue-50 text-blue-700'
+  const style = tone === 'error' ? 'border-red-400/30 bg-red-400/10 text-red-200' : 'border-white/16 bg-white/8 text-white/80'
   return (
-    <div role={tone === 'error' ? 'alert' : 'status'} className={`rounded-lg border px-3 py-2 text-sm ${style}`}>
+    <div role={tone === 'error' ? 'alert' : 'status'} className={`rounded-[0.333em] border px-3 py-2 text-sm ${style}`}>
       {children}
     </div>
   )
@@ -114,7 +120,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-4"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -125,15 +131,15 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-xl outline-none sm:rounded-2xl ${size === 'lg' ? 'sm:max-w-3xl' : 'sm:max-w-xl'}`}
+        className={`max-h-[92vh] w-full animate-rise overflow-y-auto rounded-t-lg border border-white/16 bg-[#0b0b0b] outline-none sm:rounded-lg ${size === 'lg' ? 'sm:max-w-3xl' : 'sm:max-w-xl'}`}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
-          <h2 className="text-base font-semibold">{title}</h2>
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/12 bg-[#0b0b0b] px-5 py-3">
+          <h2 className="text-lg tracking-tight">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            className="rounded-[0.333em] p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
           >
             <svg viewBox="0 0 20 20" className="size-5" fill="currentColor" aria-hidden="true">
               <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
@@ -163,13 +169,13 @@ export function ConfirmDialog({
 }) {
   return (
     <Modal title={title} onClose={onCancel}>
-      <p className="text-sm text-slate-600">{message}</p>
+      <p className="text-sm text-white/60">{message}</p>
       <div className="mt-5 flex justify-end gap-2">
         <Button variant="secondary" onClick={onCancel} disabled={busy}>
           Cancelar
         </Button>
         <Button variant="danger" onClick={onConfirm} disabled={busy}>
-          {busy && <Spinner className="size-4 border-white/40 border-t-white" />}
+          {busy && <Spinner className="size-4" />}
           {confirmLabel}
         </Button>
       </div>

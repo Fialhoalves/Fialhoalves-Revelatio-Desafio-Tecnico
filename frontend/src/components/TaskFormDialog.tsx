@@ -158,12 +158,12 @@ export function TaskFormDialog({ task, onClose, onChanged }: Props) {
 
           {attachments.length > 0 && (
             <div>
-              <p className="mb-1 text-sm font-medium text-slate-700">Anexos da tarefa</p>
-              <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+              <p className="mb-1.5 text-xs text-white/60">Anexos da tarefa</p>
+              <ul className="divide-y divide-white/8 rounded-md border border-white/12">
                 {attachments.map((attachment) => (
                   <li key={attachment.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
                     <span className="min-w-0 flex-1 truncate">
-                      {attachment.original_name} <span className="text-xs text-slate-500">({formatSize(attachment.size)})</span>
+                      {attachment.original_name} <span className="text-xs text-white/60">({formatSize(attachment.size)})</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Button
@@ -189,8 +189,7 @@ export function TaskFormDialog({ task, onClose, onChanged }: Props) {
                       ) : (
                         <Button
                           type="button"
-                          variant="ghost"
-                          className="text-red-600 hover:bg-red-50"
+                          variant="danger"
                           onClick={() => setConfirmingRemoval(attachment.id)}
                         >
                           Remover
@@ -213,11 +212,11 @@ export function TaskFormDialog({ task, onClose, onChanged }: Props) {
                   pickFiles(event.target.files)
                   event.target.value = ''
                 }}
-                className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+                className="block w-full text-sm text-white/60 file:mr-3 file:cursor-pointer file:rounded-[0.333em] file:border-0 file:bg-white/16 file:px-3.5 file:py-2 file:text-[13px] file:text-white hover:file:bg-white/25"
               />
             </Field>
             {fileProblems.length > 0 && (
-              <ul role="alert" className="mt-2 space-y-0.5 text-xs text-red-600">
+              <ul role="alert" className="mt-2 space-y-0.5 text-xs text-red-300">
                 {fileProblems.map((problem) => (
                   <li key={problem}>{problem}</li>
                 ))}
@@ -226,14 +225,14 @@ export function TaskFormDialog({ task, onClose, onChanged }: Props) {
             {files.length > 0 && (
               <ul className="mt-2 space-y-1">
                 {files.map((file, index) => (
-                  <li key={`${file.name}-${index}`} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-1.5 text-sm">
+                  <li key={`${file.name}-${index}`} className="flex items-center justify-between rounded-md bg-white/6 px-3 py-1.5 text-sm">
                     <span className="truncate">
-                      {file.name} <span className="text-xs text-slate-500">({formatSize(file.size)})</span>
+                      {file.name} <span className="text-xs text-white/60">({formatSize(file.size)})</span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}
-                      className="ml-2 text-xs font-medium text-red-600 hover:underline"
+                      className="ml-2 text-xs text-red-300 hover:underline"
                     >
                       Remover
                     </button>
@@ -248,7 +247,7 @@ export function TaskFormDialog({ task, onClose, onChanged }: Props) {
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting || !title.trim()}>
-              {submitting && <Spinner className="size-4 border-white/40 border-t-white" />}
+              {submitting && <Spinner className="size-4" />}
               {task ? 'Salvar alterações' : 'Criar tarefa'}
             </Button>
           </div>

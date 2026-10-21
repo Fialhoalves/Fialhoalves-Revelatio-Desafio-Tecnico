@@ -35,7 +35,7 @@ export function AttachmentPreview({ attachment, onClose }: { attachment: Attachm
 
   return (
     <Modal title={attachment.original_name} onClose={onClose} size="lg">
-      <div className="flex min-h-48 items-center justify-center rounded-lg bg-slate-100">
+      <div className="flex min-h-48 items-center justify-center rounded-md bg-white/6">
         {error && (
           <div className="p-4">
             <Alert>{error}</Alert>
@@ -46,16 +46,16 @@ export function AttachmentPreview({ attachment, onClose }: { attachment: Attachm
           <img src={url} alt={attachment.original_name} className="max-h-[65vh] max-w-full object-contain" />
         )}
         {url && isPdf(attachment) && (
-          <iframe src={url} title={attachment.original_name} className="h-[65vh] w-full rounded-lg" />
+          <iframe src={url} title={attachment.original_name} className="h-[65vh] w-full rounded-md bg-white" />
         )}
         {!previewable && (
-          <p className="p-6 text-center text-sm text-slate-600">
+          <p className="p-6 text-center text-sm text-white/60">
             Este tipo de arquivo não tem pré-visualização. Faça o download para abrir.
           </p>
         )}
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="text-xs text-slate-500">{formatSize(attachment.size)}</span>
+        <span className="text-xs text-white/60">{formatSize(attachment.size)}</span>
         <Button onClick={download}>Baixar arquivo</Button>
       </div>
     </Modal>

@@ -21,7 +21,7 @@ export function FiltersBar({ filters, users, isAdmin, onChange }: Props) {
   }, [search, filters.q, onChange])
 
   return (
-    <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 rounded-md border border-white/12 bg-white/4 p-4 sm:grid-cols-2 lg:grid-cols-4">
       <input
         type="search"
         value={search}
@@ -96,12 +96,12 @@ export function FiltersBar({ filters, users, isAdmin, onChange }: Props) {
         <span className="hidden lg:block" />
       )}
 
-      <label className="flex items-center gap-2 text-sm text-slate-700">
+      <label className="flex items-center gap-2 text-sm text-white/70">
         <input
           type="checkbox"
           checked={filters.overdue}
           onChange={(event) => onChange({ overdue: event.target.checked })}
-          className="size-4 rounded border-slate-300 text-indigo-600"
+          className="size-4 accent-white"
         />
         Somente atrasadas
       </label>

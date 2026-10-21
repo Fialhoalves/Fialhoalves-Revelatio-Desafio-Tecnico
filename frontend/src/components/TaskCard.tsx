@@ -21,18 +21,22 @@ interface Props {
   onComplete: (task: Task) => void
   onEdit: (task: Task) => void
   onDelete: (task: Task) => void
+  index?: number
 }
 
-export function TaskCard({ task, showOwner, busy, onComplete, onEdit, onDelete }: Props) {
+export function TaskCard({ task, showOwner, busy, onComplete, onEdit, onDelete, index = 0 }: Props) {
   const overdue = isOverdue(task.due_date, task.status)
   const done = task.status === 'DONE'
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-sm">
+    <article
+      className="animate-rise rounded-md border border-white/12 bg-white/4 p-5 transition-colors duration-[350ms] hover:border-white/24 hover:bg-white/6"
+      style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className={`truncate text-base font-semibold ${done ? 'text-slate-400 line-through' : ''}`}>{task.title}</h3>
-          {task.description && <p className="mt-1 line-clamp-2 text-sm text-slate-600">{task.description}</p>}
+          <h3 className={`truncate text-lg tracking-tight ${done ? 'text-white/40 line-through' : ''}`}>{task.title}</h3>
+          {task.description && <p className="mt-1 line-clamp-2 text-sm text-white/60">{task.description}</p>}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge tone={STATUS_TONE[task.status]}>{STATUS_LABEL[task.status]}</Badge>
@@ -40,8 +44,8 @@ export function TaskCard({ task, showOwner, busy, onComplete, onEdit, onDelete }
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
-        <span className={overdue ? 'font-semibold text-red-600' : ''}>
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/60">
+        <span className={overdue ? 'text-red-300' : ''}>
           {overdue ? 'Atrasada · ' : 'Prazo: '}
           {formatDate(task.due_date)}
         </span>
@@ -51,7 +55,7 @@ export function TaskCard({ task, showOwner, busy, onComplete, onEdit, onDelete }
         {showOwner && <span>Dono: {task.owner.name}</span>}
       </div>
 
-      <div className="mt-3 flex flex-wrap justify-end gap-2">
+      <div className="mt-4 flex flex-wrap justify-end gap-2">
         {!done && (
           <Button variant="secondary" onClick={() => onComplete(task)} disabled={busy}>
             Concluir
@@ -60,7 +64,7 @@ export function TaskCard({ task, showOwner, busy, onComplete, onEdit, onDelete }
         <Button variant="secondary" onClick={() => onEdit(task)} disabled={busy}>
           Editar
         </Button>
-        <Button variant="ghost" onClick={() => onDelete(task)} disabled={busy} className="text-red-600 hover:bg-red-50">
+        <Button variant="danger" onClick={() => onDelete(task)} disabled={busy}>
           Excluir
         </Button>
       </div>

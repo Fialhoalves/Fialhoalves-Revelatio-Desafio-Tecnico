@@ -1,10 +1,13 @@
 import type { TaskStats } from '../types'
+import { Odometer } from './Odometer'
 
-function Card({ label, value, tone }: { label: string; value: number; tone: string }) {
+function Card({ label, value, tone, index }: { label: string; value: number; tone: string; index: number }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold ${tone}`}>{value}</p>
+    <div className="animate-rise rounded-md border border-white/12 bg-white/4 p-4" style={{ animationDelay: `${index * 70}ms` }}>
+      <p className="text-xs text-white/60">{label}</p>
+      <p className={`mt-3 text-5xl tracking-[-0.04em] ${tone}`}>
+        <Odometer value={value} />
+      </p>
     </div>
   )
 }
@@ -13,34 +16,34 @@ export function StatsCards({ stats }: { stats: TaskStats }) {
   return (
     <section aria-label="Resumo das tarefas" className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <Card label="Total" value={stats.total} tone="text-slate-900" />
-        <Card label="Pendentes" value={stats.by_status.PENDING} tone="text-amber-600" />
-        <Card label="Em andamento" value={stats.by_status.IN_PROGRESS} tone="text-blue-600" />
-        <Card label="Concluídas" value={stats.by_status.DONE} tone="text-emerald-600" />
-        <Card label="Atrasadas" value={stats.overdue} tone="text-red-600" />
+        <Card index={0} label="Total" value={stats.total} tone="text-white" />
+        <Card index={1} label="Pendentes" value={stats.by_status.PENDING} tone="text-amber-300" />
+        <Card index={2} label="Em andamento" value={stats.by_status.IN_PROGRESS} tone="text-sky-300" />
+        <Card index={3} label="Concluídas" value={stats.by_status.DONE} tone="text-emerald-300" />
+        <Card index={4} label="Atrasadas" value={stats.overdue} tone="text-red-300" />
       </div>
 
       {stats.by_owner && stats.by_owner.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <div className="animate-rise overflow-x-auto rounded-md border border-white/12 bg-white/4" style={{ animationDelay: '350ms' }}>
           <table className="w-full text-left text-sm">
-            <caption className="px-4 pt-3 text-left text-sm font-semibold">Por usuário</caption>
-            <thead className="text-xs uppercase tracking-wide text-slate-500">
+            <caption className="px-4 pt-4 text-left text-base">Por usuário</caption>
+            <thead className="text-xs text-white/60">
               <tr>
-                <th className="px-4 py-2 font-medium">Usuário</th>
-                <th className="px-4 py-2 font-medium">Total</th>
-                <th className="px-4 py-2 font-medium">Pendentes</th>
-                <th className="px-4 py-2 font-medium">Em andamento</th>
-                <th className="px-4 py-2 font-medium">Concluídas</th>
+                <th className="px-4 py-3 font-normal">Usuário</th>
+                <th className="px-4 py-3 font-normal">Total</th>
+                <th className="px-4 py-3 font-normal">Pendentes</th>
+                <th className="px-4 py-3 font-normal">Em andamento</th>
+                <th className="px-4 py-3 font-normal">Concluídas</th>
               </tr>
             </thead>
             <tbody>
               {stats.by_owner.map((owner) => (
-                <tr key={owner.owner_id} className="border-t border-slate-100">
-                  <td className="px-4 py-2 font-medium">{owner.owner_name}</td>
-                  <td className="px-4 py-2">{owner.total}</td>
-                  <td className="px-4 py-2">{owner.by_status.PENDING}</td>
-                  <td className="px-4 py-2">{owner.by_status.IN_PROGRESS}</td>
-                  <td className="px-4 py-2">{owner.by_status.DONE}</td>
+                <tr key={owner.owner_id} className="border-t border-white/8">
+                  <td className="px-4 py-2.5">{owner.owner_name}</td>
+                  <td className="px-4 py-2.5">{owner.total}</td>
+                  <td className="px-4 py-2.5 text-white/70">{owner.by_status.PENDING}</td>
+                  <td className="px-4 py-2.5 text-white/70">{owner.by_status.IN_PROGRESS}</td>
+                  <td className="px-4 py-2.5 text-white/70">{owner.by_status.DONE}</td>
                 </tr>
               ))}
             </tbody>

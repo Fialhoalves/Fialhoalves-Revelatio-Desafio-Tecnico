@@ -1,14 +1,19 @@
 from functools import lru_cache
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+DEV_SECRET_KEY = "dev-only-change-me"
+MIN_SECRET_LENGTH = 32
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql+psycopg://taskmanager:taskmanager@localhost:5432/taskmanager"
-    secret_key: str = "dev-only-change-me"
+    environment: str = "development"  # "production" ativa as verificações de segurança de inicialização
+    secret_key: str = DEV_SECRET_KEY
     access_token_expire_minutes: int = 60
 
     # Origens permitidas no CORS, separadas por vírgula (ex.: URL da Vercel).
@@ -45,6 +50,16 @@ class Settings(BaseSettings):
             if value.startswith(prefix):
                 return "postgresql+psycopg://" + value[len(prefix):]
         return value
+
+    @model_validator(mode="after")
+    def require_strong_secret_in_production(self) -> "Settings":
+        if self.environment.lower() == "production":
+            if self.secret_key.startswith(DEV_SECRET_KEY) or len(self.secret_key) < MIN_SECRET_LENGTH:
+                raise ValueError(
+                    f"SECRET_KEY precisa ter ao menos {MIN_SECRET_LENGTH} caracteres e não pode ser o valor de "
+                    "desenvolvimento quando ENVIRONMENT=production"
+                )
+        return self
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -5,6 +5,7 @@ import { Spinner } from './components/ui'
 import { useAuth } from './contexts/AuthContext'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
 import TasksPage from './pages/TasksPage'
+import UsersPage from './pages/UsersPage'
 
 function FullPageSpinner() {
   return (
@@ -21,6 +22,14 @@ function Protected({ children }: { children: ReactNode }) {
   return user ? children : <Navigate to="/login" replace />
 }
 
+// Também só conveniência: GET /users responde 403 a quem não é administrador.
+function AdminOnly({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth()
+  if (loading) return <FullPageSpinner />
+  if (!user) return <Navigate to="/login" replace />
+  return user.role === 'ADMIN' ? children : <Navigate to="/" replace />
+}
+
 function PublicOnly({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return <FullPageSpinner />
@@ -35,7 +44,8 @@ export default function App() {
         <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
         <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
         <Route path="/" element={<Protected><TasksPage /></Protected>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/usuarios" element={<AdminOnly><UsersPage /></AdminOnly>} />
+        <Route path="*"element={<Navigate to="/" replace />} />
       </Routes>
     </>
   )

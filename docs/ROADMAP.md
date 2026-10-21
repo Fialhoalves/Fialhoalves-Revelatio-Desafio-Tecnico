@@ -14,7 +14,7 @@ Rotas e seções previstas além do quadro de tarefas. A navegação de seções
 
 | Rota | Perfil | Conteúdo | Dependência na API |
 | --- | --- | --- | --- |
-| `/usuarios/:id` | Administrador | Tarefas e resumo de um usuário | Filtro `owner_id` já existe |
+| `/usuarios/:id` | Administrador | Página própria com tarefas e resumo de um usuário. Hoje o nome leva ao quadro filtrado (`/?dono=ID`) | Filtro `owner_id` já existe |
 | `/anexos` | Administrador | Visão geral dos arquivos enviados, com tamanho e dono | Nova rota de listagem |
 | `/conta` | Todos | Dados do perfil e troca de senha | Novas rotas de perfil |
 

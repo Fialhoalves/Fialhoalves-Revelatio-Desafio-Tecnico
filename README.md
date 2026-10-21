@@ -27,14 +27,14 @@ Toda a autenticação e a autorização acontecem no servidor. O front-end apena
 
 ## Interface
 
-O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastro, painel de resumo, quadro kanban (Pendente, Em andamento e Concluída) com arrastar e soltar por mouse ou toque, filtros (busca por texto, status, prioridade, prazo vencido e dono), ordenação, formulário de tarefa com anexos e conferência dos arquivos antes de enviar, preview de imagens, PDF, TXT e CSV direto no cartão da tarefa (e abertura de Word e Excel por download), data de criação e botão de concluir em cada cartão, e visão de administrador com o dono de cada tarefa, o resumo por usuário e uma tela com a lista de usuários e seus perfis (o menu de seções só aparece para administradores; a restrição real é da API). Detalhes em [frontend/README.md](frontend/README.md).
+O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastro, painel de resumo, quadro kanban (Pendente, Em andamento e Concluída) com arrastar e soltar por mouse ou toque, filtros (busca por texto e por usuário, status, prioridade, prazo vencido e dono; no administrador, clicar no nome de um usuário abre o quadro só com as tarefas dele), ordenação, formulário de tarefa com anexos e conferência dos arquivos antes de enviar, preview de imagens, PDF, TXT e CSV direto no cartão da tarefa (e abertura de Word e Excel por download), data de criação e botão de concluir em cada cartão, e visão de administrador com o dono de cada tarefa, o resumo por usuário e uma tela com a lista de usuários e seus perfis (o menu de seções só aparece para administradores; a restrição real é da API). Detalhes em [frontend/README.md](frontend/README.md).
 
 ## Funcionalidades
 
 - Cadastro e login com JWT.
 - Dois perfis: `USER` e `ADMIN`.
 - CRUD de tarefas, com atalho para concluir.
-- Filtros por status, prioridade, prazo, atraso e dono (admin), busca por texto, ordenação e paginação (`limit` e `offset`).
+- Filtros por status, prioridade, prazo, atraso e dono (admin), busca por texto (para administradores, também pelo nome ou e-mail do dono), ordenação e paginação (`limit` e `offset`).
 - Estatísticas por status e prioridade, com resumo por usuário para administradores.
 - Upload, listagem, download e remoção de anexos, com preview via `?inline=true`.
 - Validação de anexos por tipo, tamanho e assinatura do conteúdo.
@@ -233,13 +233,13 @@ cd backend
 pytest
 ```
 
-São 102 execuções (73 cenários distintos): autenticação, permissões entre perfis, CRUD de tarefas, filtros e estatísticas, upload e download de anexos nos dois backends de armazenamento, validações, dados de demonstração e cada código de erro do catálogo. Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16, valida as migrations e compila o front-end.
+São 105 execuções (76 cenários distintos): autenticação, permissões entre perfis, CRUD de tarefas, filtros e estatísticas, upload e download de anexos nos dois backends de armazenamento, validações, dados de demonstração e cada código de erro do catálogo. Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16, valida as migrations e compila o front-end.
 
 Detalhes de como os testes são feitos, o que cada arquivo cobre e por que esses casos estão em [docs/TESTING.md](docs/TESTING.md).
 
 ## API
 
-Documentação interativa em `/docs`. Resumo das rotas:
+Documentação interativa em `/docs` (a raiz da API redireciona para ela). Todas as rotas têm resumo em português, e a descrição da página traz um roteiro de teste. Resumo das rotas:
 
 | Método | Rota | Descrição |
 |---|---|---|

@@ -27,14 +27,14 @@ Na segunda forma a suíte roda contra PostgreSQL. O banco informado é recriado 
 | `test_task_queries.py` | 12 | Filtros por prioridade, prazo e atraso; ordenação por prazo (sem prazo no fim), prioridade e título; paginação com total; campo de ordenação inválido; estatísticas para usuário e administrador. |
 | `test_attachments.py` | 22 | 11 cenários executados nos dois backends de armazenamento (disco e PostgreSQL): ciclo de upload, listagem, download e remoção; nome com acentos no download; tipo não permitido; arquivo grande demais sem deixar resíduo; assinatura do conteúdo; acesso seguindo o dono; remoção do conteúdo ao apagar a tarefa; headers de segurança. |
 | `test_health_and_config.py` | 8 | Health de vida e de prontidão (incluindo falha do banco); `SECRET_KEY` fraca rejeitada em produção e aceita em desenvolvimento. |
-| `test_demo_seed.py` | 5 | Dados de demonstração: cobrem todas as colunas, prioridades, atraso e tarefa sem prazo; idempotência; arquivos gravados e baixáveis; contas de exemplo com acesso só às próprias tarefas. |
+| `test_demo_seed.py` | 8 | Dados de demonstração: cobrem todas as colunas, prioridades, atraso e tarefa sem prazo; maioria das tarefas e todo usuário com anexos, incluindo Word e Excel; idempotência e reposição de anexos que faltam em tarefas existentes; arquivos gravados e baixáveis; pacotes Office bem formados; contas de exemplo com acesso só às próprias tarefas. |
 | `test_tasks.py` | 7 | CRUD e conclusão; validações; isolamento entre usuários; administrador gerenciando tudo; filtros básicos; `owner_id` ignorado no corpo da requisição. |
 | `test_auth.py` | 5 | Cadastro, login, e-mail duplicado, senha errada, `/users` restrito a administrador. |
 | `test_rate_limit.py` | 4 | Bloqueio após falhas mesmo com a senha correta; sucesso zera o contador; contas independentes; expiração da janela com relógio simulado. |
 
 ## Por que esses testes
 
-A contagem é consequência dos critérios abaixo, não uma meta. São 70 cenários distintos em 99 execuções; as demais são variações do mesmo cenário (o teste de autenticação roda uma vez para cada uma das 17 rotas e os testes de anexos rodam nos dois backends).
+A contagem é consequência dos critérios abaixo, não uma meta. São 73 cenários distintos em 102 execuções; as demais são variações do mesmo cenário (o teste de autenticação roda uma vez para cada uma das 17 rotas e os testes de anexos rodam nos dois backends).
 
 1. **Cada regra de acesso tem um caso permitido e um proibido.** Usuário comum e administrador contra cada recurso (tarefa, anexo, lista de usuários, estatísticas).
 2. **Cada código de erro do catálogo tem um teste.** O front depende desses códigos, então eles fazem parte do contrato.

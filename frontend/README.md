@@ -40,6 +40,8 @@ src/
 - **Navegação por perfil.** Administradores veem as seções Tarefas e Usuários no cabeçalho; o perfil comum usa só o quadro. O redirecionamento de `/usuarios` é conveniência: a API responde 403 a quem não é administrador. As rotas previstas estão em `docs/ROADMAP.md`.
 - **Alternativa sem arrastar.** Cada cartão tem um seletor de status, que atende teclado e leitor de tela.
 - **Celular.** Colunas empilhadas, alvos de toque de 44 px, resumo compacto e filtros recolhidos atrás do botão Filtros e campos com fonte de 16 px para evitar o zoom automático do iOS.
+- **Anexos no cartão.** Cada cartão mostra os anexos da tarefa (miniatura para imagens pequenas, etiqueta do tipo para os demais, e "+N" quando há mais de três). Clicar abre o preview sem entrar na edição, para usuário comum e administrador. Imagens, PDF, TXT e CSV têm preview; Word e Excel oferecem download. Textos longos são cortados na tela, com o arquivo completo disponível para download. As miniaturas são buscadas com o token e ficam só em memória.
+- **Dados da tarefa no cartão.** Título, descrição, prioridade, prazo, data de criação, dono (para administrador) e as ações Concluir, mover por seletor e Excluir.
 - **Conferência de anexos.** No formulário, cada arquivo escolhido mostra miniatura (imagens) ou etiqueta do tipo, e pode ser visualizado em tamanho maior antes de salvar.
 - **Autorização no servidor.** O front guarda o token e o envia em `Authorization`. Esconder botões por perfil é apenas conveniência visual; toda regra de acesso é validada pela API.
 - **Erros por código.** O cliente converte as respostas de erro em `ApiError` e `src/lib/errors.ts` traduz cada `code` para uma mensagem em português. Status HTTP e código nunca são exibidos.

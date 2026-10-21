@@ -27,7 +27,7 @@ Toda a autenticação e a autorização acontecem no servidor. O front-end apena
 
 ## Interface
 
-O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastro, painel de resumo, quadro kanban (Pendente, Em andamento e Concluída) com arrastar e soltar por mouse ou toque, filtros (busca por texto, status, prioridade, prazo vencido e dono), ordenação, formulário de tarefa com anexos e conferência dos arquivos antes de enviar, preview de imagens e PDF, e visão de administrador com o dono de cada tarefa, o resumo por usuário e uma tela com a lista de usuários e seus perfis (o menu de seções só aparece para administradores; a restrição real é da API). Detalhes em [frontend/README.md](frontend/README.md).
+O front-end fica em `frontend/` (React, Vite e Tailwind). Possui login e cadastro, painel de resumo, quadro kanban (Pendente, Em andamento e Concluída) com arrastar e soltar por mouse ou toque, filtros (busca por texto, status, prioridade, prazo vencido e dono), ordenação, formulário de tarefa com anexos e conferência dos arquivos antes de enviar, preview de imagens, PDF, TXT e CSV direto no cartão da tarefa (e abertura de Word e Excel por download), data de criação e botão de concluir em cada cartão, e visão de administrador com o dono de cada tarefa, o resumo por usuário e uma tela com a lista de usuários e seus perfis (o menu de seções só aparece para administradores; a restrição real é da API). Detalhes em [frontend/README.md](frontend/README.md).
 
 ## Funcionalidades
 
@@ -199,7 +199,7 @@ uvicorn app.main:app --reload
 
 ### Dados de demonstração
 
-Com `SEED_DEMO_DATA=true` a inicialização cria, além dos dois usuários do seed, as contas `ana@example.com` e `bruno@example.com` (mesma senha do usuário comum), cerca de 17 tarefas em todos os status, prioridades e situações (atrasada, sem prazo, concluída) e 11 anexos. Os arquivos são gerados em memória e passam pelo mesmo serviço do upload, então a validação por assinatura também é exercitada. A operação é idempotente: tarefas já existentes (mesmo dono e título) não são duplicadas.
+Com `SEED_DEMO_DATA=true` a inicialização cria, além dos dois usuários do seed, as contas `ana@example.com` e `bruno@example.com` (mesma senha do usuário comum), 17 tarefas em todos os status, prioridades e situações (atrasada, sem prazo, concluída) e 31 anexos de imagem, PDF, CSV, TXT, Word e Excel (quase todas as tarefas têm arquivo, e uma delas tem quatro). Os arquivos são gerados em memória e passam pelo mesmo serviço do upload, então a validação por assinatura também é exercitada. A operação é idempotente: tarefas já existentes (mesmo dono e título) não são duplicadas, e anexos de exemplo que faltarem em tarefas existentes são completados.
 
 ```bash
 SEED_DEMO_DATA=true docker compose up --build
@@ -233,7 +233,7 @@ cd backend
 pytest
 ```
 
-São 99 execuções (70 cenários distintos): autenticação, permissões entre perfis, CRUD de tarefas, filtros e estatísticas, upload e download de anexos nos dois backends de armazenamento, validações, dados de demonstração e cada código de erro do catálogo. Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16, valida as migrations e compila o front-end.
+São 102 execuções (73 cenários distintos): autenticação, permissões entre perfis, CRUD de tarefas, filtros e estatísticas, upload e download de anexos nos dois backends de armazenamento, validações, dados de demonstração e cada código de erro do catálogo. Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16, valida as migrations e compila o front-end.
 
 Detalhes de como os testes são feitos, o que cada arquivo cobre e por que esses casos estão em [docs/TESTING.md](docs/TESTING.md).
 

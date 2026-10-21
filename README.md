@@ -244,8 +244,10 @@ Passos:
 2. Vercel: importar o repositório com Root Directory `frontend` e a variável `VITE_API_URL` apontando para a URL da API.
 3. No plano gratuito do Render a API entra em repouso após 15 minutos sem uso, e a primeira requisição seguinte pode levar cerca de um minuto.
 
-- API: a definir
-- Front-end: a definir
+- Front-end: https://fialhoalves-revelatio-desafio-tecni.vercel.app
+- API: https://taskmanager-api-2gkp.onrender.com (documentação em `/docs`)
+
+O plano gratuito do Render coloca a API em repouso após 15 minutos sem uso. A primeira requisição depois disso pode levar cerca de um minuto.
 
 Contas de demonstração no ambiente publicado (dados fictícios, apenas para avaliação):
 

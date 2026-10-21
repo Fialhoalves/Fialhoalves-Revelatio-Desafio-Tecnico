@@ -1,18 +1,7 @@
 import { formatDate, isOverdue, PRIORITY_LABEL, STATUS_LABEL } from '../lib/format'
-import type { Priority, Task, TaskStatus } from '../types'
+import { PRIORITY_TONE, STATUS_TONE } from '../lib/tones'
+import type { Task } from '../types'
 import { Badge, Button } from './ui'
-
-const STATUS_TONE: Record<TaskStatus, 'amber' | 'blue' | 'green'> = {
-  PENDING: 'amber',
-  IN_PROGRESS: 'blue',
-  DONE: 'green',
-}
-
-const PRIORITY_TONE: Record<Priority, 'slate' | 'indigo' | 'red'> = {
-  LOW: 'slate',
-  MEDIUM: 'indigo',
-  HIGH: 'red',
-}
 
 interface Props {
   task: Task

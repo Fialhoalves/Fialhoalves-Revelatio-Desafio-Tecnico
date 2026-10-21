@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { PAGE_SIZE, tasksApi, usersApi } from '../api/endpoints'
 import { AppHeader } from '../components/AppHeader'
 import { FiltersBar } from '../components/FiltersBar'
+import { KanbanBoard } from '../components/KanbanBoard'
 import { StatsCards } from '../components/StatsCards'
 import { TaskCard } from '../components/TaskCard'
 import { TaskFormDialog } from '../components/TaskFormDialog'
@@ -10,7 +11,13 @@ import { useToast } from '../components/Toast'
 import { Alert, Button, ConfirmDialog, Spinner } from '../components/ui'
 import { useAuth } from '../contexts/AuthContext'
 import { ApiError, errorMessage } from '../lib/errors'
-import type { Task, TaskFilters } from '../types'
+import type { Task, TaskFilters, TaskPage, TaskStatus } from '../types'
+
+type View = 'list' | 'board'
+
+const VIEW_KEY = 'task-manager.view'
+// O quadro mostra todas as colunas de uma vez, então busca até o máximo que a API devolve por página.
+const BOARD_LIMIT = 100
 
 const DEFAULT_FILTERS: TaskFilters = {
   q: '',
@@ -23,24 +30,48 @@ const DEFAULT_FILTERS: TaskFilters = {
   page: 1,
 }
 
+function loadView(): View {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'board' ? 'board' : 'list'
+  } catch {
+    return 'list'
+  }
+}
+
 export default function TasksPage() {
   const { user } = useAuth()
   const toast = useToast()
   const queryClient = useQueryClient()
   const isAdmin = user?.role === 'ADMIN'
 
+  const [view, setView] = useState<View>(loadView)
   const [filters, setFilters] = useState<TaskFilters>(DEFAULT_FILTERS)
   const [editing, setEditing] = useState<Task | 'new' | null>(null)
   const [deleting, setDeleting] = useState<Task | null>(null)
+
+  const changeView = (next: View) => {
+    setView(next)
+    setFilters((current) => ({ ...current, page: 1 }))
+    try {
+      localStorage.setItem(VIEW_KEY, next)
+    } catch {
+      // preferência de visualização é opcional
+    }
+  }
 
   // Qualquer mudança de filtro volta para a primeira página, exceto a troca de página em si.
   const patchFilters = useCallback((patch: Partial<TaskFilters>) => {
     setFilters((current) => ({ ...current, page: 1, ...patch }))
   }, [])
 
+  const board = view === 'board'
+  // No quadro o status é a coluna, então o filtro de status não se aplica.
+  const queryFilters: TaskFilters = board ? { ...filters, status: '', page: 1 } : filters
+  const limit = board ? BOARD_LIMIT : PAGE_SIZE
+
   const tasks = useQuery({
-    queryKey: ['tasks', filters],
-    queryFn: () => tasksApi.list(filters),
+    queryKey: ['tasks', view, queryFilters],
+    queryFn: () => tasksApi.list(queryFilters, limit),
     placeholderData: keepPreviousData,
   })
   const stats = useQuery({ queryKey: ['stats'], queryFn: tasksApi.stats })
@@ -65,6 +96,24 @@ export default function TasksPage() {
     onError: onMutationError,
   })
 
+  // Troca de status pelo quadro: atualiza a tela na hora e desfaz se o servidor recusar.
+  const move = useMutation({
+    mutationFn: ({ task, status }: { task: Task; status: TaskStatus }) => tasksApi.update(task.id, { status }),
+    onMutate: async ({ task, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+      const snapshots = queryClient.getQueriesData<TaskPage>({ queryKey: ['tasks'] })
+      queryClient.setQueriesData<TaskPage>({ queryKey: ['tasks'] }, (current) =>
+        current && { ...current, items: current.items.map((item) => (item.id === task.id ? { ...item, status } : item)) },
+      )
+      return { snapshots }
+    },
+    onError: (error, _variables, context) => {
+      context?.snapshots.forEach(([key, data]) => queryClient.setQueryData(key, data))
+      onMutationError(error)
+    },
+    onSettled: refresh,
+  })
+
   const remove = useMutation({
     mutationFn: (task: Task) => tasksApi.remove(task.id),
     onSuccess: () => {
@@ -83,13 +132,17 @@ export default function TasksPage() {
 
   // Se a última tarefa de uma página for removida, volta uma página.
   useEffect(() => {
-    if (tasks.data && tasks.data.items.length === 0 && filters.page > 1) {
+    if (!board && tasks.data && tasks.data.items.length === 0 && filters.page > 1) {
       setFilters((current) => ({ ...current, page: Math.min(current.page, totalPages) }))
     }
-  }, [tasks.data, filters.page, totalPages])
+  }, [board, tasks.data, filters.page, totalPages])
 
   const hasActiveFilters =
-    filters.q !== '' || filters.status !== '' || filters.priority !== '' || filters.overdue || filters.owner_id !== ''
+    filters.q !== '' ||
+    (!board && filters.status !== '') ||
+    filters.priority !== '' ||
+    filters.overdue ||
+    filters.owner_id !== ''
 
   return (
     <>
@@ -103,10 +156,27 @@ export default function TasksPage() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
           <p className="text-sm text-white/60">{tasks.data ? `${total} ${total === 1 ? 'tarefa' : 'tarefas'}` : ''}</p>
-          <Button onClick={() => setEditing('new')}>Nova tarefa</Button>
+          <div className="flex items-center gap-2">
+            <div role="group" aria-label="Modo de visualização" className="flex rounded-[0.333em] border border-white/16 p-0.5">
+              {(['list', 'board'] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={view === option}
+                  onClick={() => changeView(option)}
+                  className={`rounded-[3px] px-3 py-1.5 text-[13px] transition-colors duration-[350ms] ${
+                    view === option ? 'bg-white text-black' : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  {option === 'list' ? 'Lista' : 'Quadro'}
+                </button>
+              ))}
+            </div>
+            <Button onClick={() => setEditing('new')}>Nova tarefa</Button>
+          </div>
         </div>
 
-        <FiltersBar filters={filters} users={users.data ?? []} isAdmin={isAdmin} onChange={patchFilters} />
+        <FiltersBar filters={filters} users={users.data ?? []} isAdmin={isAdmin} onChange={patchFilters} showStatus={!board} />
 
         {tasks.isError && <Alert>{errorMessage(tasks.error)}</Alert>}
 
@@ -136,7 +206,24 @@ export default function TasksPage() {
           </div>
         )}
 
-        {tasks.data && tasks.data.items.length > 0 && (
+        {tasks.data && tasks.data.items.length > 0 && board && (
+          <div className={`transition-opacity ${tasks.isPlaceholderData ? 'opacity-60' : ''}`}>
+            <KanbanBoard
+              tasks={tasks.data.items}
+              showOwner={isAdmin}
+              onMove={(task, status) => move.mutate({ task, status })}
+              onEdit={setEditing}
+              onDelete={setDeleting}
+            />
+            {total > BOARD_LIMIT && (
+              <p className="mt-3 text-center text-xs text-white/60">
+                Mostrando as {BOARD_LIMIT} primeiras de {total} tarefas. Use os filtros para refinar.
+              </p>
+            )}
+          </div>
+        )}
+
+        {tasks.data && tasks.data.items.length > 0 && !board && (
           <div className={`space-y-3 transition-opacity ${tasks.isPlaceholderData ? 'opacity-60' : ''}`}>
             {tasks.data.items.map((task, index) => (
               <TaskCard
@@ -153,7 +240,7 @@ export default function TasksPage() {
           </div>
         )}
 
-        {total > PAGE_SIZE && (
+        {!board && total > PAGE_SIZE && (
           <nav aria-label="Paginação" className="flex items-center justify-between">
             <Button variant="secondary" disabled={filters.page <= 1} onClick={() => patchFilters({ page: filters.page - 1 })}>
               Anterior

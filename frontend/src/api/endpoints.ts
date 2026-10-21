@@ -20,12 +20,12 @@ export const usersApi = {
 }
 
 export const tasksApi = {
-  list: (filters: TaskFilters) => {
+  list: (filters: TaskFilters, limit = PAGE_SIZE) => {
     const params = new URLSearchParams({
       sort: filters.sort,
       order: filters.order,
-      limit: String(PAGE_SIZE),
-      offset: String((filters.page - 1) * PAGE_SIZE),
+      limit: String(limit),
+      offset: String((filters.page - 1) * limit),
     })
     if (filters.q.trim()) params.set('q', filters.q.trim())
     if (filters.status) params.set('status', filters.status)

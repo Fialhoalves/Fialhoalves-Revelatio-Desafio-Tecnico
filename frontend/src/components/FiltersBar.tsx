@@ -8,9 +8,11 @@ interface Props {
   users: User[]
   isAdmin: boolean
   onChange: (patch: Partial<TaskFilters>) => void
+  /** No quadro, o status já é a coluna, então o filtro de status é ocultado. */
+  showStatus?: boolean
 }
 
-export function FiltersBar({ filters, users, isAdmin, onChange }: Props) {
+export function FiltersBar({ filters, users, isAdmin, onChange, showStatus = true }: Props) {
   const [search, setSearch] = useState(filters.q)
 
   // Busca com debounce de 300 ms para não consultar o servidor a cada tecla.
@@ -30,19 +32,21 @@ export function FiltersBar({ filters, users, isAdmin, onChange }: Props) {
         aria-label="Buscar tarefas"
         className={`${inputClass} sm:col-span-2`}
       />
-      <select
-        aria-label="Filtrar por status"
-        value={filters.status}
-        onChange={(event) => onChange({ status: event.target.value as TaskStatus | '' })}
-        className={inputClass}
-      >
-        <option value="">Todos os status</option>
-        {Object.entries(STATUS_LABEL).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
+      {showStatus && (
+        <select
+          aria-label="Filtrar por status"
+          value={filters.status}
+          onChange={(event) => onChange({ status: event.target.value as TaskStatus | '' })}
+          className={inputClass}
+        >
+          <option value="">Todos os status</option>
+          {Object.entries(STATUS_LABEL).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      )}
       <select
         aria-label="Filtrar por prioridade"
         value={filters.priority}

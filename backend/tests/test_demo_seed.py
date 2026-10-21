@@ -1,9 +1,13 @@
+import io
+import xml.etree.ElementTree as ET
+import zipfile
 from datetime import date
 
 from sqlalchemy import func, select
 
 from app.demo_data import ASSETS, DEMO_USER_TASKS, EXTRA_USERS, populate
 from app.models import Attachment, Task, TaskStatus, User
+from app.services.attachments import delete_attachment
 from app.storage.local import LocalStorage
 
 
@@ -22,6 +26,8 @@ def test_populate_covers_every_flow(db_session, storage):
 
     kinds = {a.content_type for a in db_session.scalars(select(Attachment)).all()}
     assert {"image/png", "application/pdf", "text/csv", "text/plain"} <= kinds
+    assert any("wordprocessingml" in kind for kind in kinds), "há documento Word"
+    assert any("spreadsheetml" in kind for kind in kinds), "há planilha Excel"
 
 
 def test_populate_is_idempotent(db_session, storage):
@@ -67,3 +73,36 @@ def test_demo_definitions_reference_existing_assets():
     for task in every_task:
         for name in task.assets:
             assert name in ASSETS
+
+
+def test_most_tasks_and_every_user_have_attachments(db_session, storage):
+    populate(db_session, storage)
+    tasks = db_session.scalars(select(Task)).all()
+
+    with_files = [t for t in tasks if t.attachments]
+    assert len(with_files) / len(tasks) >= 0.8, "a maioria das tarefas de exemplo tem anexo"
+    for owner_id in {t.owner_id for t in tasks}:
+        assert any(t.attachments for t in tasks if t.owner_id == owner_id), "todo usuário tem tarefa com anexo"
+    assert any(len(t.attachments) > 3 for t in tasks), "há tarefa com mais anexos do que cabem no cartão"
+
+
+def test_populate_completes_missing_attachments_on_existing_tasks(db_session, storage):
+    populate(db_session, storage)
+    task = next(t for t in db_session.scalars(select(Task)).all() if len(t.attachments) >= 2)
+    removed = task.attachments[0]
+    delete_attachment(db_session, storage, removed)
+    db_session.expire_all()
+
+    again = populate(db_session, storage)
+
+    assert again == {"users": 0, "tasks": 0, "attachments": 1}
+    db_session.refresh(task)
+    assert removed.original_name in {a.original_name for a in task.attachments}
+
+
+def test_office_documents_are_well_formed_packages():
+    for name in ("especificacao-api.docx", "orcamento-trimestre.xlsx"):
+        with zipfile.ZipFile(io.BytesIO(ASSETS[name].build())) as package:
+            assert "[Content_Types].xml" in package.namelist()
+            for part in package.namelist():
+                ET.fromstring(package.read(part))  # todo XML precisa ser bem formado

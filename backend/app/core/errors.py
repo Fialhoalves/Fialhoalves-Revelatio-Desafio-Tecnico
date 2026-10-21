@@ -60,6 +60,16 @@ class PermissionDenied(AppError):
     message = "Você não tem permissão para realizar esta ação."
 
 
+class TooManyAttempts(AppError):
+    status_code = 429
+    code = "RATE_LIMITED"
+    message = "Muitas tentativas de login. Aguarde alguns minutos e tente novamente."
+
+    def __init__(self, retry_after: int):
+        super().__init__(headers={"Retry-After": str(retry_after)})
+        self.retry_after = retry_after
+
+
 # --- Recursos --------------------------------------------------------------------
 class EmailAlreadyRegistered(AppError):
     status_code = 409

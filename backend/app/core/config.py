@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     secret_key: str = DEV_SECRET_KEY
     access_token_expire_minutes: int = 60
 
+    # Tentativas de login malsucedidas permitidas por IP + e-mail dentro da janela.
+    login_max_attempts: int = 5
+    login_window_seconds: int = 900
+
     # Origens permitidas no CORS, separadas por vírgula (ex.: URL da Vercel).
     cors_origins: str = "http://localhost:5173"
 

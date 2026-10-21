@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 
 from app.core.deps import CurrentUser, DbSession
 from app.core.errors import EmailAlreadyRegistered, InvalidCredentials
+from app.core.rate_limit import login_limiter
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models import Role, User
 from app.schemas.user import Token, UserCreate, UserOut
@@ -27,11 +28,19 @@ def register(data: UserCreate, db: DbSession):
 
 
 @router.post("/login", response_model=Token)
-def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession):
-    """Login com e-mail (campo `username`) e senha. Retorna um JWT."""
-    user = db.scalar(select(User).where(User.email == form.username.lower()))
+def login(request: Request, form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession):
+    """Login com e-mail (campo `username`) e senha. Retorna um JWT.
+
+    Após várias falhas seguidas para o mesmo IP e e-mail, responde 429 por um período.
+    """
+    email = form.username.lower()
+    key = f"{request.client.host if request.client else 'desconhecido'}:{email}"
+    login_limiter.check(key)
+    user = db.scalar(select(User).where(User.email == email))
     if user is None or not verify_password(form.password, user.password_hash):
+        login_limiter.register_failure(key)
         raise InvalidCredentials()
+    login_limiter.reset(key)
     return Token(access_token=create_access_token(user.id))
 
 

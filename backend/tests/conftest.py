@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.config import get_settings
+from app.core.rate_limit import login_limiter
 from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
@@ -18,6 +19,13 @@ from app.main import app
 from app.models import Role, User
 from app.storage import get_storage
 from app.storage.local import LocalStorage
+
+
+@pytest.fixture(autouse=True)
+def reset_login_limiter():
+    login_limiter.reset()
+    yield
+    login_limiter.reset()
 
 
 @pytest.fixture

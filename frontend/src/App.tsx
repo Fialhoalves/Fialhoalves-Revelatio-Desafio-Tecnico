@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { CircleCursor } from './components/CircleCursor'
 import { Spinner } from './components/ui'
 import { useAuth } from './contexts/AuthContext'
@@ -30,6 +30,12 @@ function AdminOnly({ children }: { children: ReactNode }) {
   return user.role === 'ADMIN' ? children : <Navigate to="/" replace />
 }
 
+// Uma URL nova (por exemplo, o link "Tarefas" do menu depois de abrir ?dono=ID) reinicia os filtros.
+function TasksRoute() {
+  const { search } = useLocation()
+  return <TasksPage key={search} />
+}
+
 function PublicOnly({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return <FullPageSpinner />
@@ -43,7 +49,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
         <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
-        <Route path="/" element={<Protected><TasksPage /></Protected>} />
+        <Route path="/" element={<Protected><TasksRoute /></Protected>} />
         <Route path="/usuarios" element={<AdminOnly><UsersPage /></AdminOnly>} />
         <Route path="*"element={<Navigate to="/" replace />} />
       </Routes>

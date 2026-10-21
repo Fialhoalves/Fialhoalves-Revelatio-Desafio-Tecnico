@@ -29,7 +29,7 @@ export function FiltersBar({ filters, users, isAdmin, onChange }: Props) {
           type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Buscar por título ou descrição"
+          placeholder={isAdmin ? 'Buscar por título, descrição ou usuário' : 'Buscar por título ou descrição'}
           aria-label="Buscar tarefas"
           className={inputClass}
         />

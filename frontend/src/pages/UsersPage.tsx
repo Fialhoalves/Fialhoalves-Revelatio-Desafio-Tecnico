@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { usersApi } from '../api/endpoints'
 import { AppHeader } from '../components/AppHeader'
 import { Alert, Badge, Spinner } from '../components/ui'
@@ -12,6 +13,7 @@ export default function UsersPage() {
       <AppHeader />
       <main className="mx-auto max-w-5xl space-y-5 px-4 pt-6 pb-16">
         <h2 className="animate-rise text-4xl tracking-[-0.04em] sm:text-5xl">Usuários</h2>
+        <p className="text-sm text-white/60">Clique no nome para ver as tarefas da pessoa.</p>
 
         {users.isPending && <Spinner className="mx-auto mt-10 block size-8" />}
         {users.isError && <Alert>{errorMessage(users.error)}</Alert>}
@@ -33,7 +35,13 @@ export default function UsersPage() {
                 {users.data.map((user) => (
                   <tr key={user.id} className="border-t border-white/8">
                     <td className="px-4 py-3">
-                      {user.name}
+                      <Link
+                        to={`/?dono=${user.id}`}
+                        aria-label={`Ver tarefas de ${user.name}`}
+                        className="inline-flex min-h-11 items-center underline-offset-4 hover:underline md:min-h-0"
+                      >
+                        {user.name}
+                      </Link>
                       {/* No celular o e-mail desce para baixo do nome, para o perfil caber na tela. */}
                       <span className="block break-all text-xs text-white/60 sm:hidden">{user.email}</span>
                     </td>

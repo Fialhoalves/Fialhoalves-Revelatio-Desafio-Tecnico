@@ -13,7 +13,7 @@ function Card({ label, value, tone, index }: { label: string; value: number; ton
   )
 }
 
-export function StatsCards({ stats }: { stats: TaskStats }) {
+export function StatsCards({ stats, onSelectOwner }: { stats: TaskStats; onSelectOwner?: (ownerId: number) => void }) {
   // No celular o resumo por usuário começa recolhido para o quadro aparecer sem tanta rolagem.
   const [showOwners, setShowOwners] = useState(() => window.matchMedia('(min-width: 768px)').matches)
   return (
@@ -54,7 +54,16 @@ export function StatsCards({ stats }: { stats: TaskStats }) {
             <tbody className={showOwners ? '' : 'hidden'}>
               {stats.by_owner.map((owner) => (
                 <tr key={owner.owner_id} className="border-t border-white/8">
-                  <td className="px-4 py-2.5">{owner.owner_name}</td>
+                  <td className="px-4 py-2.5">
+                    <button
+                      type="button"
+                      onClick={() => onSelectOwner?.(owner.owner_id)}
+                      aria-label={`Ver tarefas de ${owner.owner_name}`}
+                      className="min-h-11 text-left underline-offset-4 hover:underline md:min-h-0"
+                    >
+                      {owner.owner_name}
+                    </button>
+                  </td>
                   <td className="px-4 py-2.5">{owner.total}</td>
                   <td className="px-4 py-2.5 text-white/70">{owner.by_status.PENDING}</td>
                   <td className="px-4 py-2.5 text-white/70">{owner.by_status.IN_PROGRESS}</td>

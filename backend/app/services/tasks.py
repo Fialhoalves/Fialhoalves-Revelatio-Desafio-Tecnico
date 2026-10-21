@@ -77,7 +77,12 @@ def list_tasks(
         query = query.where(Task.due_date < date.today(), Task.status != TaskStatus.DONE)
     if q:
         pattern = f"%{q}%"
-        query = query.where(or_(Task.title.ilike(pattern), Task.description.ilike(pattern)))
+        conditions = [Task.title.ilike(pattern), Task.description.ilike(pattern)]
+        if user.role == Role.ADMIN:
+            # O administrador também encontra tarefas pelo nome ou e-mail do dono.
+            query = query.join(User, User.id == Task.owner_id)
+            conditions += [User.name.ilike(pattern), User.email.ilike(pattern)]
+        query = query.where(or_(*conditions))
 
     total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
 

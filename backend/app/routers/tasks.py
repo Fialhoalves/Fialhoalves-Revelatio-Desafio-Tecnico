@@ -17,18 +17,21 @@ router = APIRouter(prefix="/tasks", tags=["tasks"], responses=error_responses(40
 Storage = Annotated[StorageBackend, Depends(get_storage)]
 
 
-@router.post("", response_model=TaskOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TaskOut, status_code=status.HTTP_201_CREATED, summary="Criar tarefa")
 def create_task(data: TaskCreate, db: DbSession, user: CurrentUser):
     return task_service.create_task(db, user, data)
 
 
-@router.get("", response_model=TaskPage)
+@router.get("", response_model=TaskPage, summary="Listar tarefas com filtros, busca e ordenação")
 def list_tasks(
     db: DbSession,
     user: CurrentUser,
     status_filter: Annotated[TaskStatus | None, Query(alias="status")] = None,
     priority: Annotated[Priority | None, Query()] = None,
-    q: Annotated[str | None, Query(description="Busca no título e na descrição")] = None,
+    q: Annotated[
+        str | None,
+        Query(description="Busca no título e na descrição. Para administradores, também no nome e e-mail do dono."),
+    ] = None,
     owner_id: Annotated[int | None, Query(description="Filtro por dono (apenas admin)")] = None,
     due_before: Annotated[date | None, Query(description="Prazo até esta data (inclusive)")] = None,
     due_after: Annotated[date | None, Query(description="Prazo a partir desta data (inclusive)")] = None,
@@ -57,30 +60,30 @@ def list_tasks(
     return TaskPage(items=items, total=total)
 
 
-@router.get("/stats", response_model=TaskStats)
+@router.get("/stats", response_model=TaskStats, summary="Estatísticas das tarefas")
 def task_stats(db: DbSession, user: CurrentUser):
     """Contagens por status e prioridade. O administrador recebe também o resumo por usuário."""
     return task_service.task_stats(db, user)
 
 
-@router.get("/{task_id}", response_model=TaskOut)
+@router.get("/{task_id}", response_model=TaskOut, summary="Detalhar tarefa")
 def get_task(task_id: int, db: DbSession, user: CurrentUser):
     return task_service.get_accessible_task(db, user, task_id)
 
 
-@router.patch("/{task_id}", response_model=TaskOut)
+@router.patch("/{task_id}", response_model=TaskOut, summary="Editar tarefa")
 def update_task(task_id: int, data: TaskUpdate, db: DbSession, user: CurrentUser):
     task = task_service.get_accessible_task(db, user, task_id)
     return task_service.update_task(db, task, data)
 
 
-@router.post("/{task_id}/complete", response_model=TaskOut)
+@router.post("/{task_id}/complete", response_model=TaskOut, summary="Marcar tarefa como concluída")
 def complete_task(task_id: int, db: DbSession, user: CurrentUser):
     task = task_service.get_accessible_task(db, user, task_id)
     return task_service.update_task(db, task, TaskUpdate(status=TaskStatus.DONE))
 
 
-@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Remover tarefa e seus anexos")
 def delete_task(task_id: int, db: DbSession, user: CurrentUser, storage: Storage):
     task = task_service.get_accessible_task(db, user, task_id)
     task_service.delete_task(db, storage, task)

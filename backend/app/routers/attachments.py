@@ -18,8 +18,7 @@ Storage = Annotated[StorageBackend, Depends(get_storage)]
 
 
 @router.post(
-    "/tasks/{task_id}/attachments", response_model=list[AttachmentOut], status_code=status.HTTP_201_CREATED
-)
+    "/tasks/{task_id}/attachments", response_model=list[AttachmentOut], status_code=status.HTTP_201_CREATED, summary="Anexar arquivos à tarefa")
 def upload_attachments(
     task_id: int, files: list[UploadFile], db: DbSession, user: CurrentUser, storage: Storage
 ):
@@ -28,12 +27,12 @@ def upload_attachments(
     return [attachment_service.add_attachment(db, storage, task, f) for f in files]
 
 
-@router.get("/tasks/{task_id}/attachments", response_model=list[AttachmentOut])
+@router.get("/tasks/{task_id}/attachments", response_model=list[AttachmentOut], summary="Listar anexos da tarefa")
 def list_attachments(task_id: int, db: DbSession, user: CurrentUser):
     return get_accessible_task(db, user, task_id).attachments
 
 
-@router.get("/attachments/{attachment_id}/download")
+@router.get("/attachments/{attachment_id}/download", summary="Baixar ou visualizar anexo")
 def download_attachment(
     attachment_id: int,
     db: DbSession,
@@ -53,7 +52,7 @@ def download_attachment(
     )
 
 
-@router.delete("/attachments/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/attachments/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Remover anexo")
 def delete_attachment(attachment_id: int, db: DbSession, user: CurrentUser, storage: Storage):
     attachment = attachment_service.get_accessible_attachment(db, user, attachment_id)
     attachment_service.delete_attachment(db, storage, attachment)

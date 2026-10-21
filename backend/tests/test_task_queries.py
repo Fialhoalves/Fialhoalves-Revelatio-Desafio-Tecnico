@@ -105,3 +105,22 @@ def test_stats_count_overdue(client, alice):
     _create(client, alice, "atrasada", due_date=yesterday)
     _create(client, alice, "ok", due_date=yesterday, status="DONE")
     assert client.get("/tasks/stats", headers=alice).json()["overdue"] == 1
+
+
+def test_admin_search_matches_owner_name_and_email(client, alice, bob, admin):
+    _create(client, alice, "relatório mensal")
+    _create(client, bob, "planejamento trimestral")
+
+    assert _titles(client, admin, "q=alice") == ["relatório mensal"]
+    assert _titles(client, admin, "q=bob@example.com") == ["planejamento trimestral"]
+    assert set(_titles(client, admin, "q=example.com")) == {"relatório mensal", "planejamento trimestral"}
+
+
+def test_user_search_does_not_look_at_owner_fields(client, alice, bob):
+    _create(client, alice, "relatório mensal")
+    _create(client, bob, "planejamento trimestral")
+
+    # Para o usuário comum a busca fica restrita ao título e à descrição das próprias tarefas.
+    assert _titles(client, alice, "q=bob") == []
+    assert _titles(client, alice, "q=alice") == []
+    assert _titles(client, alice, "q=relatório") == ["relatório mensal"]

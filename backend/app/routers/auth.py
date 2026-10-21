@@ -14,7 +14,7 @@ from app.schemas.user import Token, UserCreate, UserOut
 router = APIRouter(prefix="/auth", tags=["auth"], responses=error_responses(401, 409, 429))
 
 
-@router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED, summary="Cadastrar usuário comum")
 def register(data: UserCreate, db: DbSession):
     """Cria um usuário comum. Administradores são criados apenas pelo seed."""
     email = data.email.lower()
@@ -27,7 +27,7 @@ def register(data: UserCreate, db: DbSession):
     return user
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, summary="Entrar e obter o token de acesso")
 def login(request: Request, form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession):
     """Login com e-mail (campo `username`) e senha. Retorna um JWT.
 
@@ -44,6 +44,6 @@ def login(request: Request, form: Annotated[OAuth2PasswordRequestForm, Depends()
     return Token(access_token=create_access_token(user.id))
 
 
-@router.get("/me", response_model=UserOut)
+@router.get("/me", response_model=UserOut, summary="Dados do usuário autenticado")
 def me(user: CurrentUser):
     return user

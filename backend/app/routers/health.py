@@ -10,13 +10,13 @@ router = APIRouter(prefix="/health", tags=["health"], responses=error_responses(
 logger = logging.getLogger("app.health")
 
 
-@router.get("")
+@router.get("", summary="Verificação de vida")
 def liveness():
     """O processo está de pé. Não consulta dependências."""
     return {"status": "ok"}
 
 
-@router.get("/ready")
+@router.get("/ready", summary="Verificação de prontidão (inclui o banco)")
 def readiness(db: DbSession):
     """A API consegue atender requisições: confirma a conexão com o banco."""
     try:

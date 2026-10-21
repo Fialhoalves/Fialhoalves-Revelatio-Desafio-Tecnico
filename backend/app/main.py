@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.core.config import get_settings
 from app.core.errors import register_error_handlers
@@ -10,10 +11,27 @@ from app.routers import attachments, auth, health, tasks, users
 setup_logging()
 settings = get_settings()
 
+DESCRIPTION = """
+Mini gerenciador de tarefas com anexos, autenticação JWT e controle de acesso por perfil.
+
+## Como testar
+
+1. Clique em **Authorize** e informe o e-mail (campo `username`) e a senha de uma conta de demonstração, listadas no README do repositório.
+   Também é possível chamar `POST /auth/login` e usar o `access_token` retornado.
+2. Chame `GET /tasks` com filtros: `status`, `priority`, `q` (texto), `overdue`, `sort` e `order`.
+3. Crie uma tarefa em `POST /tasks` e anexe arquivos em `POST /tasks/{task_id}/attachments`.
+4. Compare os perfis: o usuário comum recebe `404` ao abrir a tarefa de outra pessoa e `403` em `GET /users`; o administrador enxerga tudo.
+
+## Erros
+
+Toda falha segue o formato `{"error": {"code", "message", "details"}}`, com códigos estáveis. O catálogo está em `docs/ERRORS.md` no repositório.
+"""
+
 app = FastAPI(
     title="Task Manager API",
-    description="Mini gerenciador de tarefas com anexos, autenticação JWT e controle de acesso por perfil.",
+    description=DESCRIPTION,
     version="1.0.0",
+    swagger_ui_parameters={"persistAuthorization": True, "displayRequestDuration": True},
     openapi_tags=[
         {"name": "auth", "description": "Cadastro, login (JWT) e dados do usuário autenticado."},
         {"name": "users", "description": "Listagem de usuários. Restrito a administradores."},
@@ -33,6 +51,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/", include_in_schema=False)
+def root():
+    """A raiz leva à documentação interativa."""
+    return RedirectResponse("/docs")
+
 
 app.include_router(health.router)
 app.include_router(auth.router)

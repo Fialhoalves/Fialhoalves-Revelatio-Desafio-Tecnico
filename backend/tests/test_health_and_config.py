@@ -40,3 +40,9 @@ def test_production_accepts_strong_secret():
 
 def test_development_allows_default_secret():
     Settings(environment="development")
+
+
+def test_root_redirects_to_interactive_docs(client):
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "/docs"

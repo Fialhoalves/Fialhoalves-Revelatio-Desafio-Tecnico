@@ -92,10 +92,23 @@ class FileTypeNotAllowed(AppError):
     message = "Este tipo de arquivo não é permitido."
 
 
+class FileContentMismatch(AppError):
+    status_code = 415
+    code = "FILE_CONTENT_MISMATCH"
+    message = "O conteúdo do arquivo não corresponde ao tipo informado."
+
+
 class FileTooLarge(AppError):
     status_code = 413
     code = "FILE_TOO_LARGE"
     message = "O arquivo é maior que o limite permitido."
+
+
+# --- Disponibilidade -------------------------------------------------------------
+class DatabaseUnavailable(AppError):
+    status_code = 503
+    code = "DB_UNAVAILABLE"
+    message = "Serviço temporariamente indisponível. Tente novamente em instantes."
 
 
 # --- Tratamento global -----------------------------------------------------------

@@ -55,3 +55,32 @@ def test_deleting_task_removes_files(client, alice, tmp_path):
     assert len(list((tmp_path / "uploads").iterdir())) == 1
     client.delete(f"/tasks/{task_id}", headers=alice)
     assert list((tmp_path / "uploads").iterdir()) == []
+
+
+def test_rejects_content_that_does_not_match_declared_type(client, alice):
+    task_id = _task(client, alice)
+    resp = _upload(client, alice, task_id, "foto.png", b"MZ\x90\x00 isto nao e uma imagem", "image/png")
+    assert resp.status_code == 415
+    assert resp.json()["error"]["code"] == "FILE_CONTENT_MISMATCH"
+
+
+def test_accepts_real_signatures(client, alice):
+    task_id = _task(client, alice)
+    png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
+    pdf = b"%PDF-1.7\n" + b"x" * 16
+    assert _upload(client, alice, task_id, "a.png", png, "image/png").status_code == 201
+    assert _upload(client, alice, task_id, "a.pdf", pdf, "application/pdf").status_code == 201
+
+
+def test_text_file_with_binary_content_is_rejected(client, alice):
+    task_id = _task(client, alice)
+    assert _upload(client, alice, task_id, "a.txt", b"abc\x00def", "text/plain").status_code == 415
+
+
+def test_security_headers(client, alice):
+    task_id = _task(client, alice)
+    att_id = _upload(client, alice, task_id).json()[0]["id"]
+    resp = client.get(f"/attachments/{att_id}/download?inline=true", headers=alice)
+    assert resp.headers["x-content-type-options"] == "nosniff"
+    assert "sandbox" in resp.headers["content-security-policy"]
+    assert resp.headers["x-request-id"]

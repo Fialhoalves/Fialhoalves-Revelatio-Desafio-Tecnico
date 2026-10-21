@@ -93,6 +93,15 @@ def test_file_type_not_allowed(client, alice):
     assert _err(resp)["code"] == "FILE_TYPE_NOT_ALLOWED"
 
 
+def test_file_content_mismatch(client, alice):
+    task_id = client.post("/tasks", json={"title": "x"}, headers=alice).json()["id"]
+    resp = client.post(
+        f"/tasks/{task_id}/attachments", files=[("files", ("a.png", b"nao e png", "image/png"))], headers=alice
+    )
+    assert resp.status_code == 415
+    assert _err(resp)["code"] == "FILE_CONTENT_MISMATCH"
+
+
 def test_file_too_large(client, alice, storage):
     storage.max_bytes = 2
     task_id = client.post("/tasks", json={"title": "x"}, headers=alice).json()["id"]

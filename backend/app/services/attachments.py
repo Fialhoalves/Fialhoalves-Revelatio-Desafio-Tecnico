@@ -2,15 +2,24 @@ from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.errors import AttachmentNotFound, FileTypeNotAllowed
+from app.core.errors import AttachmentNotFound, FileContentMismatch, FileTypeNotAllowed
 from app.models import Attachment, Role, Task, User
+from app.services.file_signature import matches_declared_type
 from app.storage.local import LocalStorage
+
+SIGNATURE_BYTES = 2048
 
 
 def add_attachment(db: Session, storage: LocalStorage, task: Task, file: UploadFile) -> Attachment:
     content_type = (file.content_type or "").lower()
     if content_type not in get_settings().allowed_content_types:
         raise FileTypeNotAllowed(f"O tipo de arquivo '{content_type or 'desconhecido'}' não é permitido.")
+
+    # O tipo declarado vem do cliente: confere os primeiros bytes antes de gravar.
+    head = file.file.read(SIGNATURE_BYTES)
+    file.file.seek(0)
+    if not matches_declared_type(content_type, head):
+        raise FileContentMismatch()
 
     stored_name, size = storage.save(file)
     attachment = Attachment(

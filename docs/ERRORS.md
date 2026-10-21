@@ -31,8 +31,10 @@ Toda resposta de erro tem o mesmo formato:
 | `ATTACHMENT_NOT_FOUND` | 404 | Anexo inexistente ou de outro usuário | Atualizar a lista de anexos |
 | `ATTACHMENT_FILE_MISSING` | 404 | Registro existe, mas o arquivo sumiu do armazenamento | Aviso "arquivo indisponível" |
 | `FILE_TYPE_NOT_ALLOWED` | 415 | Upload de tipo fora da allowlist | Aviso no upload listando tipos aceitos |
+| `FILE_CONTENT_MISMATCH` | 415 | Os primeiros bytes do arquivo não condizem com o tipo declarado | Aviso no upload: arquivo corrompido ou com extensão trocada |
 | `FILE_TOO_LARGE` | 413 | Upload acima de `MAX_UPLOAD_MB` (10 MB) | Aviso no upload com o limite |
 | `VALIDATION_ERROR` | 422 | Campos inválidos | Marcar cada campo de `details[].field` |
+| `DB_UNAVAILABLE` | 503 | Banco de dados fora do ar (health check de prontidão) | Tentar novamente depois |
 | `NOT_FOUND` | 404 | Rota inexistente | Página "não encontrada" |
 | `METHOD_NOT_ALLOWED` | 405 | Método HTTP errado | Erro genérico |
 | `INTERNAL_ERROR` | 500 | Falha inesperada | "Algo deu errado, tente novamente" |

@@ -17,7 +17,7 @@ Contas de demonstração no ambiente publicado (dados fictícios, apenas para av
 | Administrador | admin@example.com | Revelatio-Admin-2026 |
 | Usuário comum | user@example.com | Revelatio-User-2026 |
 
-Qualquer pessoa pode criar uma conta nova pelo cadastro, que sempre cria um usuário comum. O plano gratuito do Render coloca a API em repouso após 15 minutos sem uso, e a primeira requisição depois disso pode levar cerca de um minuto.
+O ambiente publicado já vem com dados de exemplo (tarefas em todos os status e anexos de imagem, PDF, CSV e TXT). Há também duas contas de usuário comum para o administrador comparar no resumo por usuário: `ana@example.com` e `bruno@example.com`, com a mesma senha do usuário comum. Qualquer pessoa pode criar uma conta nova pelo cadastro, que sempre cria um usuário comum. O plano gratuito do Render coloca a API em repouso após 15 minutos sem uso, e a primeira requisição depois disso pode levar cerca de um minuto.
 
 ## Visão geral
 
@@ -197,6 +197,16 @@ python -m app.seed
 uvicorn app.main:app --reload
 ```
 
+### Dados de demonstração
+
+Com `SEED_DEMO_DATA=true` a inicialização cria, além dos dois usuários do seed, as contas `ana@example.com` e `bruno@example.com` (mesma senha do usuário comum), cerca de 17 tarefas em todos os status, prioridades e situações (atrasada, sem prazo, concluída) e 11 anexos. Os arquivos são gerados em memória e passam pelo mesmo serviço do upload, então a validação por assinatura também é exercitada. A operação é idempotente: tarefas já existentes (mesmo dono e título) não são duplicadas.
+
+```bash
+SEED_DEMO_DATA=true docker compose up --build
+```
+
+O blueprint do Render já liga essa opção.
+
 ## Variáveis de ambiente
 
 Os valores de exemplo estão em `backend/.env.example`.
@@ -214,6 +224,7 @@ Os valores de exemplo estão em `backend/.env.example`.
 | `MAX_UPLOAD_MB` | Tamanho máximo por arquivo | `10` |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Administrador criado pelo seed | `admin@example.com`, `admin12345` |
 | `DEMO_USER_EMAIL`, `DEMO_USER_PASSWORD` | Usuário comum criado pelo seed | `user@example.com`, `user12345` |
+| `SEED_DEMO_DATA` | Cria tarefas e anexos de exemplo na inicialização | `false` |
 
 ## Testes
 
@@ -222,7 +233,7 @@ cd backend
 pytest
 ```
 
-São 94 execuções (65 cenários distintos): autenticação, permissões entre perfis, CRUD de tarefas, filtros e estatísticas, upload e download de anexos nos dois backends de armazenamento, validações e cada código de erro do catálogo. Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16, valida as migrations e compila o front-end.
+São 99 execuções (70 cenários distintos): autenticação, permissões entre perfis, CRUD de tarefas, filtros e estatísticas, upload e download de anexos nos dois backends de armazenamento, validações, dados de demonstração e cada código de erro do catálogo. Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16, valida as migrations e compila o front-end.
 
 Detalhes de como os testes são feitos, o que cada arquivo cobre e por que esses casos estão em [docs/TESTING.md](docs/TESTING.md).
 

@@ -42,6 +42,9 @@ class Settings(BaseSettings):
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
+    # Cria tarefas e anexos de exemplo na inicialização (app/demo_data.py).
+    seed_demo_data: bool = False
+
     # Usuários criados pelo seed (app/seed.py).
     admin_name: str = "Administrador"
     admin_email: str = "admin@example.com"

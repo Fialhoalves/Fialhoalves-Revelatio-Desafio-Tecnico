@@ -22,6 +22,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-dev-only-change-me-dev-only-change-me}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
       STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
     volumes:
       - uploads:/data/uploads
     depends_on:

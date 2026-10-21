@@ -1,7 +1,9 @@
 import os
 
 # Precisa vir antes de importar a app: o engine lê a URL na importação.
-os.environ["DATABASE_URL"] = "sqlite://"
+# TEST_DATABASE_URL permite rodar a suíte contra PostgreSQL (CI); por padrão usa SQLite em memória.
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "sqlite://")
+os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["SECRET_KEY"] = "test-secret-key-with-at-least-32-bytes!!"
 
 import pytest
@@ -30,11 +32,16 @@ def reset_login_limiter():
 
 @pytest.fixture
 def db_session():
-    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    if TEST_DATABASE_URL.startswith("sqlite"):
+        engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    else:
+        engine = create_engine(TEST_DATABASE_URL)
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)()
     yield session
     session.close()
+    Base.metadata.drop_all(engine)
     engine.dispose()
 
 

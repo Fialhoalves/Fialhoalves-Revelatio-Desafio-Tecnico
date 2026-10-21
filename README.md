@@ -247,6 +247,15 @@ Passos:
 - API: a definir
 - Front-end: a definir
 
+Contas de demonstração no ambiente publicado (dados fictícios, apenas para avaliação):
+
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Administrador | admin@example.com | Revelatio-Admin-2026 |
+| Usuário comum | user@example.com | Revelatio-User-2026 |
+
+As senhas do ambiente local (Docker) são as descritas em "Como executar". Qualquer pessoa pode criar uma conta nova pelo cadastro, que sempre cria um usuário comum.
+
 ## Uso de IA
 
 Ferramenta utilizada: Claude Code, como assistente de programação no terminal.

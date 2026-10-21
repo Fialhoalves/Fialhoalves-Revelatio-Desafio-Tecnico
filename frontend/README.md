@@ -35,6 +35,9 @@ src/
 
 ## Decisões
 
+- **Quadro kanban.** A visão em quadro agrupa as tarefas por status. Arrastar um cartão para outra coluna chama `PATCH /tasks/{id}` com o novo status. A tela atualiza na hora (atualização otimista do TanStack Query) e desfaz a mudança se a API recusar. Cada cartão também tem um seletor de status, que cobre teclado, leitor de tela e celular, onde o arrastar do navegador não funciona. O quadro busca até 100 tarefas e, para administradores, mostra todas com o dono; os mesmos filtros da lista se aplicam, exceto o de status, que vira a própria coluna.
+- **Conferência de anexos.** No formulário, cada arquivo escolhido mostra miniatura (imagens) ou etiqueta do tipo, e pode ser visualizado em tamanho maior antes de salvar.
+
 - **Autorização no servidor.** O front guarda o token e o envia em `Authorization`. Esconder botões por perfil é apenas conveniência visual; toda regra de acesso é validada pela API.
 - **Erros por código.** O cliente converte as respostas de erro em `ApiError` e `src/lib/errors.ts` traduz cada `code` para uma mensagem em português. Status HTTP e código nunca são exibidos.
 - **Anexos autenticados.** Preview e download usam `fetch` com o token e `URL.createObjectURL`, porque `<img src>` e links diretos não enviam o cabeçalho de autenticação.

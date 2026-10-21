@@ -13,8 +13,12 @@ Toda a autenticação e a autorização acontecem no servidor. O front-end apena
 - Cadastro e login com JWT.
 - Dois perfis: `USER` e `ADMIN`.
 - CRUD de tarefas, com atalho para concluir.
-- Filtro por status, busca por texto e paginação.
+- Filtros por status, prioridade, prazo, atraso e dono (admin), busca por texto, ordenação e paginação.
+- Estatísticas por status e prioridade, com resumo por usuário para administradores.
 - Upload, listagem, download e remoção de anexos, com preview via `?inline=true`.
+- Validação de anexos por tipo, tamanho e assinatura do conteúdo.
+- Limite de tentativas de login e logs de requisição.
+- Verificações de vida e prontidão (`/health` e `/health/ready`).
 - Formato único de erro, com código estável e mensagem em português.
 - Documentação interativa em `/docs` (Swagger).
 
@@ -154,8 +158,10 @@ Os valores de exemplo estão em `backend/.env.example`.
 | Variável | Descrição | Padrão |
 |---|---|---|
 | `DATABASE_URL` | Conexão com o PostgreSQL | banco local do compose |
+| `ENVIRONMENT` | `production` exige `SECRET_KEY` forte na inicialização | `development` |
 | `SECRET_KEY` | Chave de assinatura do JWT | valor de desenvolvimento |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Validade do token | `60` |
+| `LOGIN_MAX_ATTEMPTS`, `LOGIN_WINDOW_SECONDS` | Falhas de login permitidas e janela em segundos | `5`, `900` |
 | `CORS_ORIGINS` | Origens do front, separadas por vírgula | `http://localhost:5173` |
 | `UPLOAD_DIR` | Pasta dos anexos | `uploads` |
 | `MAX_UPLOAD_MB` | Tamanho máximo por arquivo | `10` |
@@ -167,6 +173,8 @@ Os valores de exemplo estão em `backend/.env.example`.
 cd backend
 pytest
 ```
+
+Por padrão a suíte usa SQLite em memória. Para rodar contra PostgreSQL, defina `TEST_DATABASE_URL`. O workflow em `.github/workflows/ci.yml` executa a suíte contra PostgreSQL 16 e valida as migrations.
 
 Os testes cobrem autenticação, permissões entre perfis, CRUD de tarefas, filtros, upload e download de anexos, validações e cada código de erro do catálogo.
 
@@ -181,7 +189,8 @@ Documentação interativa em `/docs`. Resumo das rotas:
 | GET | `/auth/me` | Usuário autenticado |
 | GET | `/users` | Lista usuários (admin) |
 | POST | `/tasks` | Cria tarefa |
-| GET | `/tasks` | Lista tarefas, com `status`, `q`, `owner_id`, `limit` e `offset` |
+| GET | `/tasks` | Lista tarefas. Parâmetros: `status`, `priority`, `q`, `owner_id`, `due_before`, `due_after`, `overdue`, `sort`, `order`, `limit`, `offset` |
+| GET | `/tasks/stats` | Contagens por status e prioridade |
 | GET | `/tasks/{id}` | Detalha tarefa |
 | PATCH | `/tasks/{id}` | Edita tarefa |
 | POST | `/tasks/{id}/complete` | Marca como concluída |
@@ -190,9 +199,10 @@ Documentação interativa em `/docs`. Resumo das rotas:
 | GET | `/tasks/{id}/attachments` | Lista anexos da tarefa |
 | GET | `/attachments/{id}/download` | Baixa o arquivo (`?inline=true` para preview) |
 | DELETE | `/attachments/{id}` | Remove anexo |
-| GET | `/health` | Verificação de saúde |
+| GET | `/health` | Verificação de vida |
+| GET | `/health/ready` | Verificação de prontidão, inclui o banco |
 
-Os erros seguem o formato e o catálogo descritos em [docs/ERRORS.md](docs/ERRORS.md).
+Os erros seguem o formato e o catálogo descritos em [docs/ERRORS.md](docs/ERRORS.md). A descrição das camadas e das decisões está em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Deploy
 
@@ -221,5 +231,6 @@ Link: a definir
 ## Limitações conhecidas
 
 - Os anexos ficam em disco local. Em mais de uma instância seria necessário um armazenamento compartilhado.
+- O limite de tentativas de login fica em memória do processo e não é compartilhado entre instâncias.
 - O token de acesso não possui refresh nem revogação.
-- O tipo do arquivo enviado é validado por uma lista de tipos permitidos e pelo limite de tamanho.
+- A validação de anexos confere a assinatura do conteúdo, mas não faz varredura de malware.

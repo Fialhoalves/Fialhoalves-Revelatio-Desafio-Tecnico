@@ -3,8 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import ErrorResponse, register_error_handlers
-from app.routers import attachments, auth, tasks, users
+from app.core.logging import setup_logging
+from app.core.middleware import register_middlewares
+from app.routers import attachments, auth, health, tasks, users
 
+setup_logging()
 settings = get_settings()
 
 app = FastAPI(
@@ -20,6 +23,7 @@ app = FastAPI(
 )
 
 register_error_handlers(app)
+register_middlewares(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,12 +33,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(tasks.router)
 app.include_router(attachments.router)
-
-
-@app.get("/health", tags=["health"])
-def health():
-    return {"status": "ok"}

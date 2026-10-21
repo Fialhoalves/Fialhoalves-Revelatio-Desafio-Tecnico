@@ -5,8 +5,6 @@ apaga o front e monta as requisições na mão.
 """
 
 import pytest
-from fastapi.routing import APIRoute
-
 from app.main import app
 
 # Únicas rotas que podem ser acessadas sem token. Qualquer rota nova fora desta
@@ -15,16 +13,24 @@ PUBLIC_ROUTES = {
     ("POST", "/auth/register"),
     ("POST", "/auth/login"),
     ("GET", "/health"),
+    ("GET", "/health/ready"),
 }
 
-FRAMEWORK_ROUTES = {"/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
+HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 
 
 def _api_routes():
-    for route in app.routes:
-        if isinstance(route, APIRoute) and route.path not in FRAMEWORK_ROUTES:
-            for method in route.methods - {"HEAD", "OPTIONS"}:
-                yield method, route.path
+    """Lê as rotas do schema OpenAPI, que independe de como o FastAPI organiza os routers."""
+    for path, operations in app.openapi()["paths"].items():
+        for method in operations:
+            if method in HTTP_METHODS:
+                yield method.upper(), path
+
+
+def test_route_discovery_is_not_empty():
+    routes = set(_api_routes())
+    assert len(routes) >= 15, "a descoberta de rotas falhou; o teste de autenticação estaria vazio"
+    assert PUBLIC_ROUTES <= routes, "há rota pública na allowlist que não existe mais"
 
 
 @pytest.mark.parametrize(("method", "path"), sorted(_api_routes()))

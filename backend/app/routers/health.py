@@ -1,0 +1,27 @@
+import logging
+
+from fastapi import APIRouter
+from sqlalchemy import text
+
+from app.core.deps import DbSession
+from app.core.errors import DatabaseUnavailable
+
+router = APIRouter(prefix="/health", tags=["health"])
+logger = logging.getLogger("app.health")
+
+
+@router.get("")
+def liveness():
+    """O processo está de pé. Não consulta dependências."""
+    return {"status": "ok"}
+
+
+@router.get("/ready")
+def readiness(db: DbSession):
+    """A API consegue atender requisições: confirma a conexão com o banco."""
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        logger.exception("Banco indisponível no health check")
+        raise DatabaseUnavailable()
+    return {"status": "ok", "database": "ok"}

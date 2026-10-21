@@ -28,7 +28,7 @@ export function Button({
 }
 
 export const inputClass =
-  'block w-full rounded-[0.333em] border border-white/16 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 transition-colors duration-[350ms] focus:border-white/70 focus:outline-none disabled:opacity-50'
+  'block w-full rounded-[0.333em] border border-white/16 bg-white/5 px-3 py-2 text-base text-white placeholder:text-white/40 md:text-sm transition-colors duration-[350ms] focus:border-white/70 focus:outline-none disabled:opacity-50'
 
 export function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: ReactNode }) {
   return (
@@ -139,7 +139,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-[0.333em] p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            className="-mr-2 rounded-[0.333em] p-2.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white md:mr-0 md:p-1"
           >
             <svg viewBox="0 0 20 20" className="size-5" fill="currentColor" aria-hidden="true">
               <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
